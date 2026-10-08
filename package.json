@@ -1,0 +1,13 @@
+{
+  "name": "shaah",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sha'ah — pointage RH sécurisé par QR dynamique + signature secrète (auto-hébergeable, sans dépendance)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

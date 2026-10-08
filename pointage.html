@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pointage — Sha'ah</title>
+<style>
+:root{
+  --B1:#081431;--B2:#0d2050;--B3:#123072;--B4:#1c4fa8;--B5:#e8f0fc;
+  --GD1:#a9791f;--GD2:#d4af37;--GD3:#e8c766;--GD4:#f0d78c;--GDP:#3a2f10;
+  --GRN:#1a7a4c;--GRNP:#e6f5ee;--RED:#c0392b;--REDP:#fdecea;
+  --G1:#f5f7fb;--G2:#eaecf2;--G4:#8691aa;--G5:#3d4a65;--W:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--B1);color:var(--W);overflow:hidden;}
+
+/* SCREENS */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 30% 0%,var(--B3) 0%,var(--B2) 45%,var(--B1) 100%);}
+.screen.on{display:flex;}
+
+/* CLOCK SCREEN */
+.clock-wrap{text-align:center;width:100%;}
+.clock-date{font-size:16px;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.clock-time{font-size:72px;font-weight:800;color:#fff;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;}
+.clock-sub{font-size:14px;color:rgba(255,255,255,.4);margin-top:6px;}
+.start-btn{margin-top:40px;width:100%;max-width:340px;padding:20px;border-radius:999px;background:linear-gradient(135deg,var(--GD4),var(--GD2));color:var(--B1);font-size:20px;font-weight:800;border:none;cursor:pointer;box-shadow:0 8px 30px rgba(212,175,55,.35);letter-spacing:.3px;}
+.start-btn:active{transform:scale(.97);}
+.start-btn.alt{background:rgba(255,255,255,.1);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.2);}
+
+/* SELECT SCREEN */
+.sel-screen-inner{width:100%;max-width:420px;}
+.sel-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px;}
+.sel-sub{font-size:14px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:24px;}
+.srch-box{position:relative;margin-bottom:12px;}
+.srch-box input{width:100%;padding:16px 16px 16px 46px;border-radius:999px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;font-size:17px;outline:none;-webkit-appearance:none;}
+.srch-box input::placeholder{color:rgba(255,255,255,.35);}
+.srch-box input:focus{border-color:var(--GD2);background:rgba(255,255,255,.15);}
+.srch-ico{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.5;}
+.emp-list{max-height:50vh;overflow-y:auto;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);}
+.emp-item{padding:15px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.07);transition:background .15s;}
+.emp-item:last-child{border-bottom:none;}
+.emp-item:active{background:rgba(255,255,255,.15);}
+.emp-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.emp-name{font-size:15px;font-weight:500;}
+.back-btn{margin-top:16px;width:100%;padding:14px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-size:15px;font-weight:500;border:1px solid rgba(255,255,255,.15);cursor:pointer;}
+
+/* QR SCREEN */
+.qr-inner{width:100%;max-width:380px;text-align:center;}
+.emp-confirm{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.1);border-radius:18px;padding:14px 18px;margin-bottom:22px;text-align:left;}
+.emp-confirm .av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.emp-confirm-name{font-size:18px;font-weight:700;}
+.emp-confirm-time{font-size:13px;color:rgba(255,255,255,.5);margin-top:2px;}
+.qr-frame{width:260px;height:260px;margin:0 auto 18px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;padding:16px;box-shadow:0 0 0 3px var(--GD2),0 14px 40px rgba(212,175,55,.3);position:relative;}
+.qr-frame img,.qr-frame canvas{width:100%;height:100%;image-rendering:pixelated;}
+.qr-ring{position:absolute;top:-14px;right:-14px;width:52px;height:52px;border-radius:50%;background:var(--B1);border:3px solid var(--GD2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:var(--GD3);font-variant-numeric:tabular-nums;}
+.qr-hint{font-size:14px;color:rgba(255,255,255,.55);margin-bottom:4px;}
+.qr-status{font-size:15px;font-weight:700;margin-top:16px;min-height:20px;}
+.qr-status.wait{color:rgba(255,255,255,.5);}
+.qr-status.ok{color:var(--GD3);}
+.qr-status.ko{color:#ff9b8a;}
+.dot-loader{display:inline-flex;gap:4px;vertical-align:middle;margin-left:6px;}
+.dot-loader span{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.2s infinite ease-in-out;}
+.dot-loader span:nth-child(2){animation-delay:.2s;}
+.dot-loader span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+
+/* SUCCESS SCREEN */
+.success-inner{text-align:center;width:100%;max-width:380px;}
+.success-ico{font-size:80px;margin-bottom:16px;animation:pop .4s ease;}
+@keyframes pop{0%{transform:scale(0.5);opacity:0;}80%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.success-name{font-size:26px;font-weight:800;margin-bottom:8px;}
+.success-time{font-size:18px;color:rgba(255,255,255,.6);margin-bottom:6px;}
+.success-badge{display:inline-block;padding:8px 20px;border-radius:999px;font-size:15px;font-weight:700;margin-bottom:28px;}
+.badge-ok{background:var(--GRNP);color:var(--GRN);}
+.badge-late{background:var(--GDP);color:var(--GD4);}
+.done-btn{width:100%;padding:18px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:16px;font-weight:600;cursor:pointer;}
+
+/* ACTIVATION SCREEN */
+.activate-code{width:100%;padding:18px;text-align:center;font-size:22px;letter-spacing:6px;border-radius:18px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;outline:none;margin:18px 0;text-transform:uppercase;font-family:'SF Mono',Consolas,monospace;}
+.activate-code::placeholder{letter-spacing:2px;font-family:inherit;color:rgba(255,255,255,.3);}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:16px;right:16px;padding:14px 18px;border-radius:14px;font-size:15px;font-weight:600;z-index:999;text-align:center;transform:translateY(-80px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{background:var(--GRN);color:#fff;}
+.toast.ko{background:var(--RED);color:#fff;}
+
+/* ADMIN LINK */
+.admin-link{position:fixed;bottom:16px;right:16px;background:rgba(255,255,255,.08);border:1px solid rgba(212,175,55,.25);color:rgba(255,255,255,.45);padding:8px 14px;border-radius:20px;font-size:11px;cursor:pointer;z-index:50;}
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN 0 : ACTIVATION DE LA TABLETTE -->
+<div class="screen" id="s-activate">
+  <div class="sel-screen-inner" style="text-align:center;">
+    <div style="font-size:44px;margin-bottom:10px;">🖥️</div>
+    <div class="sel-title">Activation de la tablette</div>
+    <div class="sel-sub">Entrez le code d'activation fourni par le service RH<br>(Espace RH → Sécurité)</div>
+    <input type="text" id="activate-code" class="activate-code" maxlength="12" placeholder="CODE D'ACTIVATION" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" onkeydown="if(event.key==='Enter')submitActivation()">
+    <button class="start-btn" style="margin-top:0;" onclick="submitActivation()">🔓 Activer cette tablette</button>
+    <div id="activate-err" style="color:#ffb3a7;font-size:13px;margin-top:14px;min-height:16px;font-weight:600;"></div>
+  </div>
+</div>
+
+<!-- ÉCRAN 1 : HORLOGE + DÉMARRER -->
+<div class="screen" id="s-clock">
+  <div class="clock-wrap">
+    <div class="clock-date" id="clk-date"></div>
+    <div class="clock-time" id="clk-time">00:00:00</div>
+    <div class="clock-sub">Heure du serveur — non modifiable</div>
+    <div style="display:flex;gap:10px;width:100%;max-width:340px;margin-top:40px;">
+      <button class="start-btn" style="margin-top:0;flex:1;padding:18px 8px;font-size:16px;" onclick="goSelect('arrivee')">👆 Arrivée</button>
+      <button class="start-btn alt" style="margin-top:0;flex:1;padding:18px 8px;font-size:16px;" onclick="goSelect('depart')">🚪 Départ</button>
+    </div>
+    <button class="back-btn" style="margin-top:14px;width:100%;max-width:340px;" onclick="goSelect('justif')">📝 Justifier un retard / départ</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 2 : CHOISIR EMPLOYÉ -->
+<div class="screen" id="s-select">
+  <div class="sel-screen-inner">
+    <div class="sel-title" id="sel-title">Qui êtes-vous ?</div>
+    <div class="sel-sub" id="sel-sub">Sélectionnez votre nom dans la liste</div>
+    <div class="srch-box">
+      <span class="srch-ico">🔍</span>
+      <input type="text" id="emp-search" placeholder="Rechercher votre nom..." oninput="filterEmps()" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="emp-list" id="emp-list"></div>
+    <button class="back-btn" onclick="goScreen('s-clock')">← Retour</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 3 : QR DE POINTAGE -->
+<div class="screen" id="s-qr">
+  <div class="qr-inner">
+    <div class="emp-confirm" id="emp-confirm-box">
+      <div class="av" id="confirm-av"></div>
+      <div>
+        <div class="emp-confirm-name" id="confirm-name"></div>
+        <div class="emp-confirm-time" id="confirm-time"></div>
+      </div>
+    </div>
+    <div class="qr-hint">Scannez ce QR avec votre app <b>Scan</b> personnelle</div>
+    <div class="qr-frame">
+      <div id="qr-render"></div>
+      <div class="qr-ring" id="qr-countdown">25</div>
+    </div>
+    <div class="qr-status wait" id="qr-status">En attente du scan<span class="dot-loader"><span></span><span></span><span></span></span></div>
+    <button class="back-btn" style="margin-top:18px;" onclick="cancelQr()">← Changer de nom</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 4 : SUCCÈS -->
+<div class="screen" id="s-success">
+  <div class="success-inner">
+    <div class="success-ico" id="suc-ico">✅</div>
+    <div class="success-name" id="suc-name"></div>
+    <div class="success-time" id="suc-time"></div>
+    <div class="success-badge" id="suc-badge"></div>
+    <button class="done-btn" onclick="resetAll()">← Terminer (prochain employé)</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 5 : LISTE DES ÉLÉMENTS À JUSTIFIER -->
+<div class="screen" id="s-justif-list">
+  <div class="sel-screen-inner">
+    <div class="sel-title">📝 Mes retards / départs</div>
+    <div class="sel-sub" id="justif-emp-name"></div>
+    <div class="emp-list" id="justif-list" style="max-height:56vh;"></div>
+    <button class="back-btn" onclick="goScreen('s-select')">← Changer de nom</button>
+    <button class="back-btn" style="margin-top:8px;" onclick="goScreen('s-clock')">← Retour à l'accueil</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 6 : FORMULAIRE DE JUSTIFICATION -->
+<div class="screen" id="s-justif-form">
+  <div class="qr-inner" style="max-width:420px;">
+    <div class="emp-confirm" id="justif-confirm-box">
+      <div class="av" id="justif-av"></div>
+      <div>
+        <div class="emp-confirm-name" id="justif-record-title"></div>
+        <div class="emp-confirm-time" id="justif-record-sub"></div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,.55);text-align:left;margin-bottom:8px;">Motif / justification</div>
+    <textarea id="justif-motif" rows="4" placeholder="Ex : embouteillage, panne de transport, urgence familiale..." style="width:100%;padding:14px;border-radius:16px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;font-size:16px;outline:none;resize:none;margin-bottom:16px;font-family:inherit;"></textarea>
+    <button class="start-btn" style="margin-top:0;width:100%;" onclick="submitJustif()">✅ Envoyer la justification</button>
+    <button class="back-btn" style="margin-top:8px;" onclick="goScreen('s-justif-list')">← Retour à la liste</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="admin-link" onclick="goAdmin()">⚙ Admin</div>
+
+<script src="/vendor/qrcode.min.js"></script>
+<script>
+// ===== CONFIG =====
+const MOIS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MOIS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const AVC = ['#123072','#1c4fa8','#2d6bc4','#d4af37','#a9791f','#1a7a4c','#c0392b','#7b1fa2','#00838f','#558b2f'];
+
+let EMPLOYEES = [];
+let KIOSK_TOKEN = localStorage.getItem('kiosk_token') || '';
+let selectedEmp = null;
+let pointMode = 'arrivee'; // 'arrivee' | 'depart' | 'justif'
+let justifRecord = null;
+let currentChallenge = null;
+let pollTimer = null;
+let countdownTimer = null;
+let qrObj = null;
+
+// ===== APPEL API AVEC JETON KIOSQUE =====
+async function apiFetch(url, options={}){
+  const headers = Object.assign({}, options.headers||{}, {'X-Kiosk-Token': KIOSK_TOKEN});
+  const res = await fetch(url, Object.assign({}, options, {headers}));
+  if(res.status===401){
+    localStorage.removeItem('kiosk_token');
+    KIOSK_TOKEN='';
+    goActivate('Cette tablette n\'est plus activée. Ressaisissez le code d\'activation.');
+    throw new Error('UNAUTHORIZED');
+  }
+  return res;
+}
+
+// ===== UTILS =====
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+function avc(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%AVC.length;return AVC[h];}
+function fmt(mn){if(!mn)return '—';const h=Math.floor(mn/60),m=mn%60;if(h&&m)return h+'h '+m+'m';return h?h+'h':m+'m';}
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',3500);
+}
+
+// ===== HORLOGE =====
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const s=String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clk-time').textContent=h+':'+m+':'+s;
+  const j=MOIS[now.getDay()];
+  const d=now.getDate();
+  const mo=MOIS_FR[now.getMonth()];
+  const yr=now.getFullYear();
+  document.getElementById('clk-date').textContent=`${j} ${d} ${mo} ${yr}`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ===== ÉCRANS =====
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+// ===== ACTIVATION DE LA TABLETTE =====
+function goActivate(err){
+  stopPolling();
+  document.getElementById('activate-code').value='';
+  document.getElementById('activate-err').textContent=err||'';
+  goScreen('s-activate');
+  setTimeout(()=>document.getElementById('activate-code').focus(),300);
+}
+
+async function submitActivation(){
+  const code=(document.getElementById('activate-code').value||'').trim().toUpperCase();
+  if(!code){document.getElementById('activate-err').textContent='Veuillez saisir le code';return;}
+  try{
+    const res=await fetch('/api/employees',{headers:{'X-Kiosk-Token':code}});
+    if(res.ok){
+      KIOSK_TOKEN=code;
+      localStorage.setItem('kiosk_token',code);
+      const data=await res.json();
+      EMPLOYEES=data.employes||[];
+      document.getElementById('activate-err').textContent='';
+      goScreen('s-clock');
+    } else {
+      document.getElementById('activate-err').textContent='Code incorrect. Vérifiez-le auprès du service RH.';
+    }
+  }catch(e){
+    document.getElementById('activate-err').textContent='Connexion au serveur impossible.';
+  }
+}
+
+// ===== CHOIX EMPLOYÉ =====
+async function goSelect(mode){
+  if(mode)pointMode=mode;
+  document.getElementById('emp-search').value='';
+  try{
+    const res=await apiFetch('/api/employees');
+    const data=await res.json();
+    EMPLOYEES=data.employes||[];
+  }catch(e){
+    if(e.message==='UNAUTHORIZED')return;
+    toast('⚠️ Connexion au serveur impossible','ko');
+  }
+  const titles={
+    arrivee:['Qui êtes-vous ?','Sélectionnez votre nom pour pointer votre arrivée'],
+    depart:['Qui êtes-vous ?','Sélectionnez votre nom pour pointer votre départ'],
+    justif:['Qui êtes-vous ?','Sélectionnez votre nom pour justifier un retard ou départ']
+  };
+  const t=titles[pointMode]||titles.arrivee;
+  document.getElementById('sel-title').textContent=t[0];
+  document.getElementById('sel-sub').textContent=t[1];
+  goScreen('s-select');
+  renderEmpList(EMPLOYEES.slice().sort((a,b)=>a.nom.localeCompare(b.nom)));
+  setTimeout(()=>document.getElementById('emp-search').focus(),300);
+}
+
+function renderEmpList(list){
+  const el=document.getElementById('emp-list');
+  if(!list.length){el.innerHTML='<div style="padding:24px;text-align:center;color:rgba(255,255,255,.5);font-size:14px;">Aucun employé trouvé</div>';return;}
+  el.innerHTML=list.map(e=>{
+    const c=avc(e.nom);
+    return `<div class="emp-item" onclick="selectEmp('${e.id}')">
+      <div class="emp-av" style="background:${c}33;color:${c};">${ini(e.nom)}</div>
+      <div class="emp-name">${e.nom}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterEmps(){
+  const q=(document.getElementById('emp-search').value||'').toLowerCase();
+  renderEmpList(EMPLOYEES.filter(e=>e.nom.toLowerCase().includes(q)).sort((a,b)=>a.nom.localeCompare(b.nom)));
+}
+
+function selectEmp(id){
+  selectedEmp=EMPLOYEES.find(e=>e.id===id);
+  if(!selectedEmp)return;
+  if(pointMode==='justif'){ goJustifList(); return; }
+  startQrFlow();
+}
+
+// ===== FLUX QR DE POINTAGE =====
+async function startQrFlow(){
+  const isDepart=pointMode==='depart';
+  const c=avc(selectedEmp.nom);
+  document.getElementById('confirm-av').style.cssText=`background:${c}33;color:${c};width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;`;
+  document.getElementById('confirm-av').textContent=ini(selectedEmp.nom);
+  document.getElementById('confirm-name').textContent=selectedEmp.nom;
+  document.getElementById('confirm-time').textContent=(isDepart?'Pointage de départ':'Pointage d\'arrivée')+' • '+(isDepart?selectedEmp.hdep:selectedEmp.href);
+  setQrStatus('En attente du scan','wait',true);
+  goScreen('s-qr');
+
+  let res, data;
+  try{
+    res=await apiFetch('/api/pointage/challenge',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empId:selectedEmp.id,type:pointMode})
+    });
+    data=await res.json();
+  }catch(e){
+    if(e.message==='UNAUTHORIZED')return;
+    setQrStatus('⚠️ Connexion impossible','ko',false);
+    return;
+  }
+  if(!res.ok||!data.ok){
+    if(data.already){
+      toast('ℹ️ Déjà pointé aujourd\'hui à '+data.already.harr,'ok');
+      goScreen('s-select');
+      return;
+    }
+    toast('⚠️ '+(data.error||'Erreur'),'ko');
+    goScreen('s-select');
+    return;
+  }
+  currentChallenge={id:data.challengeId, expiresIn:data.expiresIn};
+  renderQr(data.challengeId);
+  startCountdown(data.expiresIn);
+  startPolling(data.challengeId);
+}
+
+function renderQr(text){
+  const holder=document.getElementById('qr-render');
+  holder.innerHTML='';
+  qrObj=new QRCode(holder,{text:text,width:228,height:228,colorDark:'#081431',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+}
+
+function startCountdown(seconds){
+  clearInterval(countdownTimer);
+  let remaining=seconds;
+  document.getElementById('qr-countdown').textContent=remaining;
+  countdownTimer=setInterval(()=>{
+    remaining--;
+    document.getElementById('qr-countdown').textContent=Math.max(0,remaining);
+    if(remaining<=0)clearInterval(countdownTimer);
+  },1000);
+}
+
+function startPolling(id){
+  stopPolling();
+  pollTimer=setInterval(async()=>{
+    let res,data;
+    try{
+      res=await apiFetch('/api/pointage/challenge/'+id);
+      data=await res.json();
+    }catch(e){ return; }
+    if(!res.ok && res.status!==410){ return; }
+    if(data.status==='confirmed'){
+      stopPolling();
+      showSuccess(data);
+    } else if(data.status==='expired'){
+      stopPolling();
+      setQrStatus('⏱ QR expiré — redemandez un pointage','ko',false);
+      setTimeout(()=>goScreen('s-select'),2200);
+    } else if(data.status==='rejected'){
+      stopPolling();
+      setQrStatus('⚠️ '+(data.error||'Pointage refusé'),'ko',false);
+      setTimeout(()=>goScreen('s-select'),2200);
+    }
+  },1200);
+}
+
+function stopPolling(){
+  clearInterval(pollTimer);pollTimer=null;
+  clearInterval(countdownTimer);countdownTimer=null;
+}
+
+function setQrStatus(msg,cls,loader){
+  const el=document.getElementById('qr-status');
+  el.className='qr-status '+cls;
+  el.innerHTML=msg+(loader?'<span class="dot-loader"><span></span><span></span><span></span></span>':'');
+}
+
+function cancelQr(){
+  stopPolling();
+  currentChallenge=null;
+  goScreen('s-select');
+}
+
+function showSuccess(data){
+  const isDepart=pointMode==='depart';
+  const rec=data.record;
+  document.getElementById('suc-name').textContent=selectedEmp.nom;
+  document.getElementById('suc-time').textContent=(isDepart?'Départ : ':'Arrivée : ')+rec.harr+' • H. prévue : '+rec.hprev;
+  const badge=document.getElementById('suc-badge');
+  const ico=document.getElementById('suc-ico');
+  if(data.estAnomalie){
+    badge.className='success-badge badge-late';
+    badge.textContent=(isDepart?'🚪 Départ anticipé : ':'⏱ Retard : ')+fmt(rec.totalMn)+(rec.justifie==='Oui'?' (justifié)':' — à justifier');
+    ico.textContent='⚠️';
+  } else {
+    badge.className='success-badge badge-ok';
+    badge.textContent=isDepart?'✅ Départ à l\'heure ou après':'✅ À l\'heure';
+    ico.textContent='✅';
+  }
+  goScreen('s-success');
+}
+
+// ===== RESET =====
+function resetAll(){
+  selectedEmp=null;justifRecord=null;currentChallenge=null;
+  pointMode='arrivee';
+  stopPolling();
+  goScreen('s-clock');
+}
+
+// ===== JUSTIFICATION D'UN RETARD / DÉPART =====
+async function goJustifList(){
+  document.getElementById('justif-emp-name').textContent=selectedEmp.nom;
+  const el=document.getElementById('justif-list');
+  el.innerHTML='<div style="padding:24px;text-align:center;color:rgba(255,255,255,.5);font-size:14px;">Chargement…</div>';
+  goScreen('s-justif-list');
+  let items=[];
+  try{
+    const res=await apiFetch('/api/my-records?empId='+encodeURIComponent(selectedEmp.id));
+    const data=await res.json();
+    items=data.records||[];
+  }catch(e){
+    if(e.message==='UNAUTHORIZED')return;
+    el.innerHTML='<div style="padding:24px;text-align:center;color:rgba(255,255,255,.5);font-size:14px;">⚠️ Connexion impossible</div>';
+    return;
+  }
+  window._justifCache=items;
+  if(!items.length){
+    el.innerHTML='<div style="padding:24px;text-align:center;color:rgba(255,255,255,.5);font-size:14px;">✅ Rien à justifier pour le moment</div>';
+  } else {
+    el.innerHTML=items.map(r=>{
+      const isDepart=r.type==='depart';
+      return `<div class="emp-item" onclick="openJustifForm('${r.id}')">
+        <div class="emp-av" style="background:${isDepart?'#1c4fa833':'#d4af3733'};color:${isDepart?'#1c4fa8':'#d4af37'};">${isDepart?'🚪':'⏱'}</div>
+        <div>
+          <div class="emp-name">${isDepart?'Départ anticipé':'Retard'} — ${fmt(r.totalMn)}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;">${r.date} • ${r.hprev} → ${r.harr}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function openJustifForm(id){
+  justifRecord=(window._justifCache||[]).find(r=>r.id===id);
+  if(!justifRecord)return;
+  const isDepart=justifRecord.type==='depart';
+  const c=avc(selectedEmp.nom);
+  document.getElementById('justif-av').style.cssText=`background:${c}33;color:${c};width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;`;
+  document.getElementById('justif-av').textContent=ini(selectedEmp.nom);
+  document.getElementById('justif-record-title').textContent=(isDepart?'Départ anticipé':'Retard')+' du '+justifRecord.date;
+  document.getElementById('justif-record-sub').textContent=justifRecord.hprev+' → '+justifRecord.harr+' • '+fmt(justifRecord.totalMn);
+  document.getElementById('justif-motif').value=justifRecord.motif||'';
+  goScreen('s-justif-form');
+}
+
+async function submitJustif(){
+  const motif=(document.getElementById('justif-motif').value||'').trim();
+  if(!motif){toast('⚠️ Veuillez saisir un motif','ko');return;}
+  if(!justifRecord)return;
+  try{
+    const res=await apiFetch('/api/justify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({recordId:justifRecord.id,motif})
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok){toast('⚠️ '+(data.error||'Erreur'),'ko');return;}
+  }catch(e){
+    if(e.message==='UNAUTHORIZED')return;
+    toast('⚠️ Connexion impossible','ko');
+    return;
+  }
+  toast('✅ Justification envoyée','ok');
+  setTimeout(()=>{
+    justifRecord=null;
+    goJustifList();
+  },1000);
+}
+
+// ===== LIEN ADMIN =====
+function goAdmin(){
+  window.open('/rh.html','_blank');
+}
+
+// ===== INIT =====
+(async function init(){
+  if(!KIOSK_TOKEN){
+    goActivate();
+    return;
+  }
+  try{
+    const res=await fetch('/api/employees',{headers:{'X-Kiosk-Token':KIOSK_TOKEN}});
+    if(!res.ok){
+      localStorage.removeItem('kiosk_token');
+      KIOSK_TOKEN='';
+      goActivate('Cette tablette n\'est plus activée. Ressaisissez le code d\'activation.');
+      return;
+    }
+    const data=await res.json();
+    EMPLOYEES=data.employes||[];
+    goScreen('s-clock');
+  }catch(e){
+    goActivate('Connexion au serveur impossible. Vérifiez votre connexion internet.');
+  }
+})();
+</script>
+</body>
+</html>

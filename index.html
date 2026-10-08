@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sha'ah</title>
+<style>
+  :root{--NAVY:#081431;--NAVY2:#0d2050;--NAVY3:#123072;--GOLD:#d4af37;--GOLD2:#f0d78c;--ICE:#c9d6f0;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:radial-gradient(circle at 30% 0%,var(--NAVY3) 0%,var(--NAVY2) 45%,var(--NAVY) 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .wrap{max-width:720px;width:100%;text-align:center;}
+  .logo{width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,var(--GOLD2),var(--GOLD));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 10px 30px rgba(212,175,55,.35);}
+  .logo svg{width:38px;height:38px;fill:var(--NAVY);}
+  h1{color:#fff;font-size:30px;font-weight:800;letter-spacing:.5px;margin-bottom:6px;}
+  p.sub{color:var(--ICE);font-size:14px;margin-bottom:40px;}
+  .cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+  a.card{flex:1;min-width:190px;background:rgba(255,255,255,.06);border:1px solid rgba(212,175,55,.25);border-radius:18px;padding:30px 20px;text-decoration:none;color:#fff;transition:transform .15s, background .15s, border-color .15s;}
+  a.card:hover{background:rgba(255,255,255,.1);transform:translateY(-3px);border-color:var(--GOLD);}
+  a.card .ico{width:48px;height:48px;border-radius:50%;background:rgba(212,175,55,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;}
+  a.card .t{font-weight:700;font-size:16px;margin-bottom:6px;}
+  a.card .d{font-size:12.5px;color:var(--ICE);line-height:1.5;}
+  footer{margin-top:44px;color:rgba(255,255,255,.35);font-size:12px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.75 5v5.4l4.2 2.5-.8 1.3-5-3V7h1.6z"/></svg>
+    </div>
+    <h1>Sha'ah</h1>
+    <p class="sub">Choisissez l'application à ouvrir sur cet appareil</p>
+    <div class="cards">
+      <a class="card" href="/pointage.html">
+        <div class="ico">🖥️</div>
+        <div class="t">Pointage</div>
+        <div class="d">Tablette placée à l'entrée — génère le QR de chaque pointage</div>
+      </a>
+      <a class="card" href="/scan.html">
+        <div class="ico">📱</div>
+        <div class="t">Scan</div>
+        <div class="d">App personnelle de l'employé — scanne le QR pour valider sa présence</div>
+      </a>
+      <a class="card" href="/rh.html">
+        <div class="ico">🗂️</div>
+        <div class="t">Espace RH</div>
+        <div class="d">Tableau de bord, employés, retards, absences</div>
+      </a>
+    </div>
+    <footer>Sha'ah — pointage sécurisé par QR dynamique · données partagées en temps réel</footer>
+  </div>
+</body>
+</html>

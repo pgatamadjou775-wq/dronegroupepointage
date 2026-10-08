@@ -1,0 +1,44 @@
+SHA'AH — Pointage RH sécurisé par QR dynamique
+=================================================
+
+Sha'ah remplace la reconnaissance faciale par un pointage QR à deux
+appareils, infalsifiable même par photo/capture d'écran :
+
+  1. L'employé sélectionne son nom sur la TABLETTE (app "Pointage")
+     et un QR code temporaire (25 secondes) s'affiche.
+  2. Il scanne ce QR avec son app personnelle "Scan", installée sur
+     SON PROPRE téléphone.
+  3. Le téléphone signe le QR avec le code secret personnel de
+     l'employé (jamais transmis en clair) et envoie la validation
+     au serveur.
+  4. Le pointage n'est validé QUE si la signature correspond
+     exactement à l'employé sélectionné sur la tablette. Un QR
+     capturé/partagé devient inutilisable après 25 secondes.
+
+DÉMARRAGE
+---------
+1. Installez Node.js 18+ (https://nodejs.org)
+2. Double-cliquez sur demarrer.bat (Windows) ou lancez ./demarrer.sh
+   (Mac/Linux), ou tapez : npm start
+3. Ouvrez http://localhost:3000 dans un navigateur
+
+TROIS APPLICATIONS
+-------------------
+  /pointage.html   -> à ouvrir sur la tablette placée à l'entrée
+  /scan.html       -> à ouvrir sur le téléphone personnel de chaque employé
+  /rh.html         -> Espace RH (tableau de bord, employés, sécurité)
+
+PREMIÈRE UTILISATION
+---------------------
+Au premier démarrage, le serveur affiche dans la console :
+  - l'identifiant / mot de passe de l'Espace RH
+  - le code d'activation de la tablette de pointage
+Notez-les immédiatement.
+
+Pour chaque employé, ouvrez sa fiche dans Espace RH > Employés et
+cliquez sur "🔑 Régénérer" pour générer son code secret personnel.
+Communiquez-le une seule fois à l'employé : il l'entre dans l'app
+Scan de son téléphone pour jumeler son identité (une seule fois,
+sauf changement de téléphone).
+
+Pour l'hébergement en ligne (Render, etc.), voir DEPLOIEMENT-EN-LIGNE.md

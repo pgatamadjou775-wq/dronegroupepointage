@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Sha'ah — Espace RH</title>
+<style>
+:root{
+  --B1:#081431;--B2:#0d2050;--B3:#123072;--B4:#1c4fa8;--B5:#ddeeff;
+  --O1:#8a6512;--O2:#c9a227;--O3:#d4af37;--O4:#faf3dc;
+  --G1:#f5f7fb;--G2:#eaecf2;--G4:#8691aa;--G5:#3d4a65;
+  --W:#fff;--RED:#c0392b;--REDP:#fdecea;--GRN:#1a7a4c;--GRNP:#e6f5ee;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--G1);color:var(--B1);min-height:100vh;padding-bottom:80px;}
+
+/* TOP BAR */
+.topbar{background:linear-gradient(135deg,var(--B1),var(--B2) 60%,var(--B3));padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(10,31,68,.3);}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-ico{width:38px;height:38px;background:var(--O2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-ico svg{width:20px;height:20px;fill:#fff;}
+.brand-txt{font-weight:800;font-size:16px;color:#fff;line-height:1.2;}
+.brand-sub{font-size:10px;color:rgba(255,255,255,.5);}
+.yr-wrap select{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 10px;border-radius:8px;font-size:14px;outline:none;}
+.yr-wrap select option{background:var(--B2);}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--B1);border-top:1px solid rgba(255,255,255,.1);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;background:none;border:none;color:rgba(255,255,255,.45);font-size:10px;font-weight:500;cursor:pointer;gap:3px;transition:color .15s;position:relative;}
+.bn.on{color:#fff;}
+.bn .ico{font-size:20px;line-height:1;}
+.bn .lbl{font-size:9px;white-space:nowrap;}
+.bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--O2);border-radius:0 0 2px 2px;}
+.bn-cnt{position:absolute;top:6px;right:calc(50% - 20px);background:var(--O2);color:#fff;border-radius:999px;font-size:9px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center;}
+
+/* CONTENT */
+.page{padding:14px 12px;}
+.panel{display:none;}.panel.on{display:block;}
+
+/* CARDS */
+.card{background:var(--W);border-radius:14px;box-shadow:0 2px 12px rgba(10,31,68,.08);overflow:hidden;margin-bottom:12px;}
+.card-h{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--G2);}
+.card-t{font-weight:700;font-size:15px;}
+.card-s{font-size:11px;color:var(--G4);margin-top:2px;}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.kpi{background:var(--W);border-radius:12px;padding:14px;box-shadow:0 2px 12px rgba(10,31,68,.08);border-left:4px solid transparent;}
+.kpi-b{border-color:var(--B4);}.kpi-o{border-color:var(--O2);}.kpi-r{border-color:var(--RED);}.kpi-g{border-color:var(--GRN);}
+.kv{font-weight:800;font-size:22px;line-height:1;}
+.kpi-b .kv{color:var(--B3);}.kpi-o .kv{color:var(--O1);}.kpi-r .kv{color:var(--RED);}.kpi-g .kv{color:var(--GRN);}
+.kl{font-size:11px;color:var(--G4);margin-top:4px;}
+
+/* FORMS */
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--G5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.fg input,.fg select{width:100%;padding:13px 14px;border:1.5px solid var(--G2);border-radius:10px;font-size:16px;color:var(--B1);background:var(--G1);outline:none;-webkit-appearance:none;appearance:none;}
+.fg input:focus,.fg select:focus{border-color:var(--B4);background:#fff;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* RETARD DISPLAY */
+.ret-box{padding:16px;border-radius:12px;text-align:center;margin:12px 0;transition:all .2s;}
+.ret-box.empty{background:var(--G1);border:2px dashed var(--G2);}
+.ret-box.ok{background:var(--GRNP);border:2px solid var(--GRN);}
+.ret-box.late{background:var(--O4);border:2px solid var(--O2);}
+.ret-val{font-weight:800;font-size:28px;color:var(--O1);line-height:1;}
+.ret-lbl{font-size:13px;font-weight:500;margin-top:4px;}
+
+/* BUTTONS */
+.btn{width:100%;padding:15px;border-radius:12px;font-size:16px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+.btn-o{background:var(--O2);color:#fff;}.btn-b{background:var(--B4);color:#fff;}.btn-ghost{background:var(--G2);color:var(--G5);}
+.btn-sm{padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;width:auto;}
+.btn-del{background:var(--REDP);color:var(--RED);}
+.btn-edit{background:var(--B5);color:var(--B3);}
+.btn-row{display:flex;gap:8px;}
+.btn-row .btn{margin-top:0;}
+
+/* FAB */
+.fab{position:fixed;right:16px;bottom:80px;width:56px;height:56px;border-radius:50%;background:var(--O2);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(245,124,0,.4);display:flex;align-items:center;justify-content:center;z-index:99;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.bg{background:var(--GRNP);color:var(--GRN);}
+.br{background:var(--REDP);color:var(--RED);}
+.bo{background:var(--O4);color:var(--O1);}
+.bb{background:var(--B5);color:var(--B3);}
+
+/* LIST ITEMS */
+.list-item{padding:14px 16px;border-bottom:1px solid var(--G2);display:flex;align-items:flex-start;gap:12px;}
+.list-item:last-child{border-bottom:none;}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.li-body{flex:1;min-width:0;}
+.li-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-sub{font-size:12px;color:var(--G4);margin-top:2px;}
+.li-right{text-align:right;flex-shrink:0;}
+.li-val{font-weight:700;font-size:15px;}
+.li-val-o{color:var(--O1);}
+.li-val-r{color:var(--RED);}
+
+/* CHART BAR */
+.cbar-wrap{padding:12px 16px;}
+.cbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cbar-name{font-size:12px;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.cbar-bg{flex:1;height:20px;border-radius:5px;background:var(--G2);overflow:hidden;}
+.cbar-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;}
+.cbar-val{font-size:10px;font-weight:700;color:#fff;}
+
+/* MONTH GRID */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;}
+.mc{background:var(--G1);border-radius:10px;padding:10px;text-align:center;border:2px solid transparent;}
+.mc.hd{background:var(--O4);border-color:var(--O3);}
+.mc-n{font-size:10px;font-weight:700;color:var(--G5);}
+.mc-v{font-weight:800;font-size:14px;margin-top:3px;}
+.mc-s{font-size:9px;color:var(--G4);margin-top:2px;}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(10,31,68,.55);z-index:200;align-items:flex-end;justify-content:center;}
+.ov.on{display:flex;}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);}
+.modal-h{padding:16px 18px;background:linear-gradient(135deg,var(--B1),var(--B3));display:flex;align-items:center;justify-content:space-between;border-radius:20px 20px 0 0;}
+.modal-t{font-weight:700;font-size:16px;color:#fff;}
+.modal-cl{background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;}
+.modal-b{padding:16px;}
+
+/* SELECT FILTER */
+.filter-bar{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;scrollbar-width:none;}
+.filter-bar::-webkit-scrollbar{display:none;}
+.fsel{padding:8px 12px;border:1.5px solid var(--G2);border-radius:20px;font-size:13px;background:var(--W);color:var(--G5);white-space:nowrap;-webkit-appearance:none;appearance:none;cursor:pointer;flex-shrink:0;}
+.fsel.active{background:var(--B3);color:#fff;border-color:var(--B3);}
+
+/* SEARCH */
+.srch{padding:10px 12px 0;}
+.srch input{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--G2);border-radius:10px;font-size:15px;background:var(--W);outline:none;position:relative;}
+.srch-wrap{position:relative;}
+.srch-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--G4);pointer-events:none;}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:12px;right:12px;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;z-index:999;text-align:center;transform:translateY(-20px);opacity:0;transition:all .25s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{background:var(--GRN);color:#fff;}
+.toast.ko{background:var(--RED);color:#fff;}
+.toast.info{background:var(--B2);color:#fff;}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--G4);}
+.empty .eico{font-size:48px;margin-bottom:10px;}
+.empty p{font-size:14px;}
+
+/* TABLE mobile style = list */
+.tbl-list{}
+
+/* SECTION HEADER */
+.sec-h{font-size:12px;font-weight:700;color:var(--G4);text-transform:uppercase;letter-spacing:.5px;padding:14px 16px 6px;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN DE CONNEXION RH -->
+<div id="lock-screen" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,var(--B1) 0%,var(--B2) 60%,var(--B3) 100%);">
+  <div style="font-size:44px;margin-bottom:8px;">🔒</div>
+  <div style="color:#fff;font-weight:800;font-size:19px;margin-bottom:4px;">Connexion à l'espace RH</div>
+  <div style="color:rgba(255,255,255,.55);font-size:13px;margin-bottom:26px;text-align:center;">Identifiez-vous pour accéder aux données de présence</div>
+  <div style="width:100%;max-width:280px;">
+    <input type="text" id="login-user" autocomplete="username" placeholder="Identifiant" style="width:100%;padding:14px 16px;font-size:15px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;outline:none;margin-bottom:10px;">
+    <input type="password" id="login-pass" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;padding:14px 16px;font-size:15px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;outline:none;margin-bottom:16px;" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-o" style="width:100%;" onclick="doLogin()">🔓 Se connecter</button>
+  </div>
+  <div id="login-err" style="color:#ffb3a7;font-size:13px;margin-top:12px;min-height:16px;font-weight:600;text-align:center;"></div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-ico"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+    <div><div class="brand-txt">Sha'ah</div><div class="brand-sub">Suivi RH</div></div>
+  </div>
+  <div class="yr-wrap">
+    <select id="yr" onchange="onYrChange()">
+      <option>2023</option><option>2024</option><option>2025</option>
+      <option value="2026" selected>2026</option><option>2027</option><option>2028</option>
+    </select>
+  </div>
+  <a href="/pointage.html" target="_blank" style="margin-left:8px;font-size:12px;color:var(--G4);text-decoration:none;white-space:nowrap;">📲 Pointage</a>
+  <a href="#" onclick="doLogout();return false;" style="margin-left:10px;font-size:12px;color:var(--G4);text-decoration:none;white-space:nowrap;">🚪 Déconnexion</a>
+</div>
+
+<!-- PAGES -->
+<div class="page">
+
+<!-- DASHBOARD -->
+<div id="p-dash" class="panel on">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div style="font-weight:800;font-size:17px;" id="dash-ttl">Tableau de bord</div>
+    <select id="dash-m" onchange="renderDash()" style="padding:8px 12px;border:1.5px solid var(--G2);border-radius:20px;font-size:13px;background:var(--W);color:var(--G5);-webkit-appearance:none;outline:none;">
+      <option value="">Toute l'année</option>
+      <option value="01">Janvier</option><option value="02">Février</option><option value="03">Mars</option>
+      <option value="04">Avril</option><option value="05">Mai</option><option value="06">Juin</option>
+      <option value="07">Juillet</option><option value="08">Août</option><option value="09">Septembre</option>
+      <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+    </select>
+  </div>
+  <div class="kpi-grid" id="kpis"></div>
+  <div class="card"><div class="card-h"><div class="card-t">🏆 Top Retards</div></div><div class="cbar-wrap" id="ch-ret"></div></div>
+  <div class="card"><div class="card-h"><div class="card-t">🏆 Top Absences</div></div><div class="cbar-wrap" id="ch-abs"></div></div>
+  <div class="card">
+    <div class="card-h"><div class="card-t">⚠️ Non justifiées</div><span class="badge br" id="njus-b"></span></div>
+    <div id="njus-list"></div>
+  </div>
+</div>
+
+<!-- SAISIE -->
+<div id="p-saisie" class="panel">
+  <!-- TABS -->
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button id="st-ret" onclick="setSaisieTab('ret')" style="flex:1;padding:12px 4px;border-radius:10px;border:2px solid var(--O2);background:var(--O2);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">⏱ Retard</button>
+    <button id="st-dep" onclick="setSaisieTab('dep')" style="flex:1;padding:12px 4px;border-radius:10px;border:2px solid var(--G2);background:var(--W);color:var(--G5);font-size:13px;font-weight:600;cursor:pointer;">🚪 Départ</button>
+    <button id="st-abs" onclick="setSaisieTab('abs')" style="flex:1;padding:12px 4px;border-radius:10px;border:2px solid var(--G2);background:var(--W);color:var(--G5);font-size:13px;font-weight:600;cursor:pointer;">📋 Absence</button>
+  </div>
+
+  <!-- FORM RETARD -->
+  <div id="sf-ret">
+    <div class="card">
+      <div class="card-h"><div class="card-t">⏱ Nouveau retard</div><div class="card-s">Le retard est calculé auto</div></div>
+      <div style="padding:14px 16px;">
+        <div class="fg">
+          <label>Employé *</label>
+          <select id="r-emp" onchange="onEmpChangeRet()"><option value="">— Choisir l'employé —</option></select>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Date *</label><input type="date" id="r-date"></div>
+          <div class="fg"><label>H. prévue</label><input type="time" id="r-hprev" value="08:00" oninput="calcRet()"></div>
+        </div>
+        <div class="fg"><label>🕐 Heure d'arrivée *</label><input type="time" id="r-harr" oninput="calcRet()" style="font-size:20px;font-weight:700;border-color:var(--O2);background:#fff;"></div>
+        <!-- AFFICHAGE RETARD -->
+        <div id="ret-box" class="ret-box empty">
+          <div class="ret-lbl" style="color:var(--G4);">Saisissez l'heure d'arrivée</div>
+        </div>
+        <div class="fg"><label>Motif (optionnel)</label><input type="text" id="r-motif" placeholder="Transports, médical..."></div>
+        <button class="btn btn-o" onclick="saveRet()">✓ Enregistrer le retard</button>
+        <button class="btn btn-ghost" onclick="clrR()" style="margin-top:6px;">Effacer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM DÉPART ANTICIPÉ -->
+  <div id="sf-dep" style="display:none;">
+    <div class="card">
+      <div class="card-h"><div class="card-t">🚪 Nouveau départ anticipé</div><div class="card-s">Le temps manquant est calculé auto</div></div>
+      <div style="padding:14px 16px;">
+        <div class="fg">
+          <label>Employé *</label>
+          <select id="d-emp" onchange="onEmpChangeDep()"><option value="">— Choisir l'employé —</option></select>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Date *</label><input type="date" id="d-date"></div>
+          <div class="fg"><label>H. départ prévue</label><input type="time" id="d-hprev" value="17:30" oninput="calcDep()"></div>
+        </div>
+        <div class="fg"><label>🚪 Heure de départ réelle *</label><input type="time" id="d-hdep" oninput="calcDep()" style="font-size:20px;font-weight:700;border-color:var(--B4);background:#fff;"></div>
+        <!-- AFFICHAGE ÉCART -->
+        <div id="dep-box" class="ret-box empty">
+          <div class="ret-lbl" style="color:var(--G4);">Saisissez l'heure de départ réelle</div>
+        </div>
+        <div class="fg"><label>Motif (optionnel)</label><input type="text" id="d-motif" placeholder="Rendez-vous, urgence..."></div>
+        <div class="fg"><label>Justifié ?</label><select id="d-just"><option value="Non">✗ Non</option><option value="Oui">✓ Oui</option></select></div>
+        <button class="btn btn-b" onclick="saveDep()">✓ Enregistrer le départ</button>
+        <button class="btn btn-ghost" onclick="clrD()" style="margin-top:6px;">Effacer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM ABSENCE -->
+  <div id="sf-abs" style="display:none;">
+    <div class="card">
+      <div class="card-h"><div class="card-t">📋 Nouvelle absence</div></div>
+      <div style="padding:14px 16px;">
+        <div class="fg"><label>Employé *</label><select id="a-emp"><option value="">— Choisir l'employé —</option></select></div>
+        <div class="fg-row">
+          <div class="fg"><label>Date début *</label><input type="date" id="a-deb"></div>
+          <div class="fg"><label>Date fin</label><input type="date" id="a-fin"></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Nb jours *</label><input type="number" id="a-j" min="0.5" step="0.5" value="1"></div>
+          <div class="fg"><label>Justifiée ?</label>
+            <select id="a-just"><option value="Oui">✓ Oui</option><option value="Non">✗ Non</option></select>
+          </div>
+        </div>
+        <div class="fg"><label>Motif</label>
+          <select id="a-mot">
+            <option value="">Non précisé</option>
+            <option>Absence maladie</option><option>Congé annuel</option><option>Congé maternité</option>
+            <option>Mission</option><option>Mariage</option><option>Deuil / Obsèques</option>
+            <option>Affaires familiales</option><option>Rendez-vous médical</option>
+            <option>Courses administratives</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="fg"><label>Précision</label><input type="text" id="a-mot2" placeholder="Détail..."></div>
+        <button class="btn btn-b" onclick="saveAbs()">✓ Enregistrer l'absence</button>
+        <button class="btn btn-ghost" onclick="clrA()" style="margin-top:6px;">Effacer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DERNIÈRES SAISIES -->
+  <div class="sec-h">Dernières saisies</div>
+  <div class="card" id="last-list"></div>
+</div>
+
+<!-- RETARDS -->
+<div id="p-ret" class="panel">
+  <div class="srch"><div class="srch-wrap"><span class="srch-ico">🔍</span><input type="text" id="s-ret" placeholder="Rechercher un employé..." oninput="renderRet()"></div></div>
+  <div class="filter-bar">
+    <select class="fsel" id="f-ret-m" onchange="renderRet()">
+      <option value="">Tous les mois</option>
+      <option value="01">Janvier</option><option value="02">Février</option><option value="03">Mars</option>
+      <option value="04">Avril</option><option value="05">Mai</option><option value="06">Juin</option>
+      <option value="07">Juillet</option><option value="08">Août</option><option value="09">Septembre</option>
+      <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+    </select>
+    <select class="fsel" id="f-ret-tp" onchange="renderRet()">
+      <option value="">Arrivée + Départ</option>
+      <option value="arrivee">⏱ Retards arrivée</option>
+      <option value="depart">🚪 Départs anticipés</option>
+    </select>
+    <select class="fsel" id="f-ret-j" onchange="renderRet()">
+      <option value="">Tous</option><option value="Oui">Justifiés</option><option value="Non">Non justifiés</option>
+    </select>
+  </div>
+  <div class="card" id="ret-list" style="margin-top:8px;"></div>
+</div>
+
+<!-- ABSENCES -->
+<div id="p-abs" class="panel">
+  <div class="srch"><div class="srch-wrap"><span class="srch-ico">🔍</span><input type="text" id="s-abs" placeholder="Rechercher un employé..." oninput="renderAbs()"></div></div>
+  <div class="filter-bar">
+    <select class="fsel" id="f-abs-m" onchange="renderAbs()">
+      <option value="">Tous les mois</option>
+      <option value="01">Janvier</option><option value="02">Février</option><option value="03">Mars</option>
+      <option value="04">Avril</option><option value="05">Mai</option><option value="06">Juin</option>
+      <option value="07">Juillet</option><option value="08">Août</option><option value="09">Septembre</option>
+      <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+    </select>
+    <select class="fsel" id="f-abs-j" onchange="renderAbs()">
+      <option value="">Toutes</option><option value="Oui">Justifiées</option><option value="Non">Non justifiées</option>
+    </select>
+  </div>
+  <div class="card" id="abs-list" style="margin-top:8px;"></div>
+</div>
+
+<!-- ANNUEL -->
+<div id="p-ann" class="panel">
+  <div class="card">
+    <div class="card-h"><div class="card-t">📅 Par mois — <span id="ann-yr"></span></div></div>
+    <div class="mgrid" id="mgrid"></div>
+  </div>
+  <div class="card"><div class="card-h"><div class="card-t">📊 Retards / mois</div></div><div class="cbar-wrap" id="ann-cr"></div></div>
+  <div class="card"><div class="card-h"><div class="card-t">📊 Absences / mois</div></div><div class="cbar-wrap" id="ann-ca"></div></div>
+  <div class="card">
+    <div class="card-h"><div class="card-t">🏆 Classement annuel</div><span class="badge bb" id="ann-es"></span></div>
+    <div id="ann-emp-list"></div>
+  </div>
+</div>
+
+<!-- EMPLOYÉS -->
+<div id="p-emp" class="panel">
+  <div class="srch"><div class="srch-wrap"><span class="srch-ico">🔍</span><input type="text" id="s-emp" placeholder="Rechercher..." oninput="renderEmp()"></div></div>
+  <div class="card" id="emp-list" style="margin-top:10px;"></div>
+  <button class="btn btn-o" onclick="openEmp()" style="margin-top:4px;">＋ Ajouter un employé</button>
+  <button class="btn btn-ghost" onclick="exportCSV()" style="margin-top:6px;">⬇ Exporter CSV</button>
+
+  <div class="card" style="margin-top:16px;padding:16px;">
+    <div class="card-h" style="padding:0 0 12px;"><div class="card-t">🔒 Sécurité</div><div class="card-s">Accès RH et activation des tablettes</div></div>
+    <div style="font-size:12.5px;color:var(--G4);margin-bottom:4px;">Code d'activation des tablettes de pointage</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <div id="kiosk-token-display" style="flex:1;font-family:monospace;font-size:18px;font-weight:700;letter-spacing:3px;background:var(--G1);border:1px solid var(--G2);border-radius:10px;padding:10px 14px;color:var(--B1);">••••••••</div>
+      <button class="btn-sm" onclick="regenerateKioskToken()" style="white-space:nowrap;padding:10px 14px;border-radius:10px;border:1px solid var(--G2);background:var(--W);cursor:pointer;font-size:12.5px;">🔄 Régénérer</button>
+    </div>
+    <div style="font-size:11.5px;color:var(--G4);margin-bottom:14px;">⚠️ Régénérer ce code désactive immédiatement toutes les tablettes déjà activées — elles devront ressaisir le nouveau code.</div>
+    <button class="btn btn-ghost" onclick="openPinChange()">👤 Modifier mon identifiant / mot de passe</button>
+  </div>
+</div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bn on" id="nb-dash" onclick="show('dash')"><span class="ico">📊</span><span class="lbl">Bord</span></button>
+  <button class="bn" id="nb-saisie" onclick="show('saisie')"><span class="ico">✏️</span><span class="lbl">Saisie</span></button>
+  <button class="bn" id="nb-ret" onclick="show('ret')"><span class="ico">⏱</span><span class="lbl">Retards</span><span class="bn-cnt" id="c-ret">0</span></button>
+  <button class="bn" id="nb-abs" onclick="show('abs')"><span class="ico">📋</span><span class="lbl">Absences</span><span class="bn-cnt" id="c-abs">0</span></button>
+  <button class="bn" id="nb-ann" onclick="show('ann')"><span class="ico">📈</span><span class="lbl">Annuel</span></button>
+  <button class="bn" id="nb-emp" onclick="show('emp')"><span class="ico">👥</span><span class="lbl">Employés</span></button>
+</div>
+
+<!-- MODAL EMPLOYÉ -->
+<div class="ov" id="ov-emp" onclick="if(event.target===this)closeOv('ov-emp')">
+  <div class="modal">
+    <div class="modal-h"><div class="modal-t" id="emp-ttl">Ajouter un employé</div><button class="modal-cl" onclick="closeOv('ov-emp')">✕</button></div>
+    <div class="modal-b">
+      <div class="fg"><label>Nom complet *</label><input type="text" id="e-nom" placeholder="Ex: Kouame Jean Claude"></div>
+      <div class="fg"><label>Poste</label><input type="text" id="e-poste" placeholder="Ex: Comptable"></div>
+      <div class="fg"><label>Département</label>
+        <select id="e-dept">
+          <option value="">— Non défini —</option>
+          <option>Direction</option><option>Informatique</option><option>Ressources Humaines</option>
+          <option>Finance</option><option>Commercial</option><option>Opérations</option><option>Logistique</option>
+        </select>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>H. arrivée réf.</label><input type="time" id="e-href" value="08:00"></div>
+        <div class="fg"><label>H. départ réf.</label><input type="time" id="e-hdep" value="17:30"></div>
+      </div>
+      <div class="fg"><label>Statut</label><select id="e-stat"><option>Actif</option><option>Inactif</option></select></div>
+      <div class="fg" id="e-secret-box" style="display:none;">
+        <label>Code secret de pointage (app Scan du téléphone)</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+          <div id="e-secret-display" style="flex:1;font-family:monospace;font-size:16px;font-weight:700;letter-spacing:2px;background:var(--G1);border:1px solid var(--G2);border-radius:10px;padding:10px 14px;color:var(--B1);">••••••••••</div>
+          <button type="button" class="btn-sm" onclick="revealOrRegenEmpSecret()" style="white-space:nowrap;padding:10px 14px;border-radius:10px;border:1px solid var(--G2);background:var(--W);cursor:pointer;font-size:12.5px;">🔑 Régénérer</button>
+        </div>
+        <div id="e-secret-status" style="font-size:11.5px;color:var(--G4);margin-top:6px;">Communiquez ce code UNE FOIS à l'employé — il l'entre dans son app Scan pour jumeler son téléphone.</div>
+      </div>
+      <div class="fg" id="e-secret-new-hint" style="display:none;">
+        <div style="font-size:11.5px;color:var(--G4);">Le code secret de pointage sera généré automatiquement après l'enregistrement — rouvrez la fiche pour le récupérer.</div>
+      </div>
+      <input type="hidden" id="e-id">
+      <button class="btn btn-o" onclick="saveEmp()">✓ Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeOv('ov-emp')" style="margin-top:6px;">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IDENTIFIANTS -->
+<div class="ov" id="ov-pin" onclick="if(event.target===this)closeOv('ov-pin')">
+  <div class="modal">
+    <div class="modal-h"><div class="modal-t">👤 Identifiant / mot de passe</div><button class="modal-cl" onclick="closeOv('ov-pin')">✕</button></div>
+    <div class="modal-b">
+      <div class="fg"><label>Mot de passe actuel *</label><input type="password" id="pin-old" autocomplete="current-password"></div>
+      <div class="fg"><label>Nouvel identifiant (optionnel)</label><input type="text" id="pin-newuser" autocomplete="username" placeholder="Laisser vide pour ne pas changer"></div>
+      <div class="fg"><label>Nouveau mot de passe (optionnel, 8 car. min.)</label><input type="password" id="pin-new1" autocomplete="new-password"></div>
+      <div class="fg"><label>Confirmer le nouveau mot de passe</label><input type="password" id="pin-new2" autocomplete="new-password"></div>
+      <button class="btn btn-o" onclick="savePinChange()">✓ Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeOv('ov-pin')" style="margin-top:6px;">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='presrh_m1';
+const MOIS=['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const EMP_BASE=["ABOUEU Viviane","ADJOUALE YAPI","AHIKO Albert","AHOUASSA Christian","AKA Eden","AKANDA ASSI Gilles","AKANDA RABET Régine","AKOMIAN YAO Modeste","AMAN ACHI Evrad","ASSI Guy Serge","ASSO Léon","BEMBELE KOUAKOU Jean","DIBY Bertin","GOORE BI","GUEDE Vanessa","KLOMAN Arthur","KOFFI Wilfried","KONAN Anicet","KONATE DOPIGNON","KOUAME DJETOUAN","KOUASSI Evariste","KOUASSI Patrice","LARE Jacques","OGOU Collins","SIE Landry","TAPE Yves Armand","TAPSOBA Christ Aubin","YAO Darius","YAO Fabrice","YAO Raïssa","YAPO Blanchard","YAPO Enoch","ZOKPE Maxime"];
+const AVC=['#1a3a6e','#1e4d96','#2d6bc4','#f57c00','#e65100','#1a7a4c','#c0392b','#7b1fa2','#00838f','#558b2f'];
+
+let DB={employes:[],retards:[],absences:[],lid:0};
+let currentPanel='dash';
+
+let sessionExpired=false;
+
+async function loadDB(){
+  try{
+    const res=await fetch('/api/data');
+    if(res.status===401){handleUnauthorized();return false;}
+    if(res.ok)DB=await res.json();
+  }catch(e){
+    console.error('Connexion au serveur impossible',e);
+    setTimeout(()=>toast('⚠️ Serveur injoignable — vérifiez votre connexion','ko'),400);
+    return false;
+  }
+  if(!DB.employes)DB.employes=[];
+  if(!DB.retards)DB.retards=[];
+  if(!DB.absences)DB.absences=[];
+  if(!DB.lid)DB.lid=0;
+  if(!DB.settings)DB.settings={};
+  if(DB.employes.length===0){
+    EMP_BASE.forEach((n,i)=>DB.employes.push({id:'E'+(i+1),nom:n,poste:'',dept:'',href:'08:00',hdep:'17:30',statut:'Actif'}));
+    saveDB();
+  }
+  // Rétrocompatibilité : s'assurer que chaque employé a une heure de départ de référence
+  DB.employes.forEach(e=>{if(!e.hdep)e.hdep='17:30';});
+  return true;
+}
+function saveDB(){
+  fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(DB)})
+    .then(res=>{ if(res.status===401)handleUnauthorized(); })
+    .catch(e=>toast('⚠️ Sauvegarde impossible — vérifiez le réseau','ko'));
+}
+async function refreshFromServer(){
+  try{
+    const res=await fetch('/api/data');
+    if(res.status===401){handleUnauthorized();return;}
+    if(!res.ok)return;
+    DB=await res.json();
+    if(!DB.settings)DB.settings={};
+  }catch(e){return;}
+  if(document.querySelector('.ov.on'))return; // ne pas perturber une saisie/modal en cours
+  if(currentPanel==='dash')renderDash();
+  else if(currentPanel==='ret')renderRet();
+  else if(currentPanel==='abs')renderAbs();
+  else if(currentPanel==='ann')renderAnn();
+  else if(currentPanel==='emp')renderEmp();
+  else if(currentPanel==='saisie'){renderLast();}
+  updateCnts();
+}
+function nid(){DB.lid++;return 'I'+DB.lid;}
+function today(){return new Date().toISOString().split('T')[0];}
+function yr(){return document.getElementById('yr').value;}
+function fyear(arr,k='date'){return arr.filter(r=>(r[k]||'').startsWith(yr()));}
+function fmon(arr,m,k='date'){return m?arr.filter(r=>(r[k]||'').substring(5,7)===m):arr;}
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+function avc(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%AVC.length;return AVC[h];}
+function av(n,s=36){const c=avc(n);return `<div class="av" style="width:${s}px;height:${s}px;background:${c}22;color:${c};">${ini(n)}</div>`;}
+function fmt(mn){if(!mn)return '—';const h=Math.floor(mn/60),m=mn%60;if(h&&m)return h+'h '+m+'m';return h?h+'h':m+'m';}
+
+function toast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',3000);
+}
+
+// ===== CONNEXION RH =====
+function handleUnauthorized(){
+  if(sessionExpired)return;
+  sessionExpired=true;
+  document.getElementById('lock-screen').style.display='flex';
+  document.getElementById('login-err').textContent='Votre session a expiré, reconnectez-vous.';
+}
+
+async function checkSession(){
+  try{
+    const res=await fetch('/api/session');
+    const data=await res.json();
+    return !!data.loggedIn;
+  }catch(e){ return false; }
+}
+
+async function doLogin(){
+  const username=document.getElementById('login-user').value.trim();
+  const password=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-err');
+  if(!username||!password){errEl.textContent='Identifiant et mot de passe requis';return;}
+  errEl.textContent='';
+  try{
+    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+    const data=await res.json();
+    if(!res.ok||!data.ok){
+      errEl.textContent=data.error||'Connexion impossible';
+      document.getElementById('login-pass').value='';
+      return;
+    }
+    sessionExpired=false;
+    document.getElementById('lock-screen').style.display='none';
+    await startApp();
+  }catch(e){
+    errEl.textContent='Connexion au serveur impossible';
+  }
+}
+
+async function doLogout(){
+  try{ await fetch('/api/logout',{method:'POST'}); }catch(e){}
+  location.reload();
+}
+
+function openPinChange(){
+  document.getElementById('pin-old').value='';
+  document.getElementById('pin-newuser').value='';
+  document.getElementById('pin-new1').value='';
+  document.getElementById('pin-new2').value='';
+  document.getElementById('ov-pin').classList.add('on');
+}
+async function savePinChange(){
+  const currentPassword=document.getElementById('pin-old').value;
+  const newUsername=document.getElementById('pin-newuser').value.trim();
+  const n1=document.getElementById('pin-new1').value;
+  const n2=document.getElementById('pin-new2').value;
+  if(!currentPassword){toast('Mot de passe actuel requis','ko');return;}
+  if(n1||n2){
+    if(n1.length<8){toast('Le nouveau mot de passe doit faire au moins 8 caractères','ko');return;}
+    if(n1!==n2){toast('Les deux mots de passe ne correspondent pas','ko');return;}
+  }
+  try{
+    const res=await fetch('/api/settings/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newUsername:newUsername||undefined,newPassword:n1||undefined})});
+    const data=await res.json();
+    if(!res.ok||!data.ok){toast(data.error||'Erreur','ko');return;}
+    if(data.username)DB.settings.rhUsername=data.username;
+    closeOv('ov-pin');
+    toast('Identifiants mis à jour','ok');
+  }catch(e){
+    toast('Connexion impossible','ko');
+  }
+}
+
+async function regenerateKioskToken(){
+  if(!confirm('Régénérer le code désactivera immédiatement toutes les tablettes déjà activées. Continuer ?'))return;
+  try{
+    const res=await fetch('/api/settings/kiosk-token',{method:'POST'});
+    const data=await res.json();
+    if(!res.ok||!data.ok){toast(data.error||'Erreur','ko');return;}
+    DB.settings.kioskToken=data.kioskToken;
+    const kd=document.getElementById('kiosk-token-display');
+    if(kd)kd.textContent=data.kioskToken;
+    toast('Nouveau code d\'activation généré','ok');
+  }catch(e){
+    toast('Connexion impossible','ko');
+  }
+}
+
+// ===== DÉMARRAGE DE L'APPLICATION (après connexion) =====
+async function startApp(){
+  const ok=await loadDB();
+  if(!ok)return;
+  document.getElementById('r-date').value=today();
+  document.getElementById('a-deb').value=today();
+  document.getElementById('d-date').value=today();
+  fillSel();renderDash();updateCnts();
+}
+
+// NAV
+function show(name){
+  currentPanel=name;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-'+name).classList.add('on');
+  document.getElementById('nb-'+name).classList.add('on');
+  if(name==='dash')renderDash();
+  else if(name==='ret')renderRet();
+  else if(name==='abs')renderAbs();
+  else if(name==='ann')renderAnn();
+  else if(name==='emp')renderEmp();
+  else if(name==='saisie'){fillSel();renderLast();}
+  window.scrollTo(0,0);
+}
+
+function onYrChange(){renderDash();renderRet();renderAbs();renderAnn();updateCnts();}
+
+// SAISIE TABS
+function setSaisieTab(t){
+  document.getElementById('sf-ret').style.display=t==='ret'?'block':'none';
+  document.getElementById('sf-dep').style.display=t==='dep'?'block':'none';
+  document.getElementById('sf-abs').style.display=t==='abs'?'block':'none';
+  const tabs={ret:{el:document.getElementById('st-ret'),c:'var(--O2)'},dep:{el:document.getElementById('st-dep'),c:'var(--B4)'},abs:{el:document.getElementById('st-abs'),c:'var(--B4)'}};
+  Object.keys(tabs).forEach(k=>{
+    const {el,c}=tabs[k];
+    if(k===t){el.style.background=c;el.style.color='#fff';el.style.borderColor=c;}
+    else{el.style.background='var(--W)';el.style.color='var(--G5)';el.style.borderColor='var(--G2)';}
+  });
+}
+
+// SELECTS
+function fillSel(){
+  const opts=DB.employes.filter(e=>e.statut==='Actif').sort((a,b)=>a.nom.localeCompare(b.nom)).map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+  ['r-emp','d-emp','a-emp'].forEach(id=>{const s=document.getElementById(id);const v=s.value;s.innerHTML='<option value="">— Choisir l\'employé —</option>'+opts;if(v)s.value=v;});
+}
+
+// CALCUL RETARD AUTO
+function onEmpChangeRet(){
+  const id=document.getElementById('r-emp').value;
+  const emp=DB.employes.find(e=>e.id===id);
+  if(emp&&emp.href)document.getElementById('r-hprev').value=emp.href;
+  calcRet();
+}
+
+function calcRet(){
+  const hp=document.getElementById('r-hprev').value;
+  const ha=document.getElementById('r-harr').value;
+  const box=document.getElementById('ret-box');
+  if(!ha){box.className='ret-box empty';box.innerHTML='<div class="ret-lbl" style="color:var(--G4);">Saisissez l\'heure d\'arrivée</div>';box._mn=0;return;}
+  const [ph,pm]=hp.split(':').map(Number);
+  const [ah,am]=ha.split(':').map(Number);
+  const diff=(ah*60+am)-(ph*60+pm);
+  if(diff<=0){
+    box.className='ret-box ok';
+    box.innerHTML='<div style="font-size:28px;">✅</div><div class="ret-lbl" style="color:var(--GRN);font-weight:700;">À l\'heure ou en avance</div>';
+    box._mn=0;return;
+  }
+  const h=Math.floor(diff/60),m=diff%60;
+  box.className='ret-box late';
+  box.innerHTML=`<div class="ret-val">${h&&m?h+'h '+m+'min':h?h+'h':m+'min'}</div><div class="ret-lbl" style="color:var(--O1);">de retard</div>`;
+  box._mn=diff;
+}
+
+// SAVE RETARD
+function saveRet(){
+  const empId=document.getElementById('r-emp').value;
+  const date=document.getElementById('r-date').value;
+  const harr=document.getElementById('r-harr').value;
+  if(!empId||!date){toast('Employé et date requis','ko');return;}
+  if(!harr){toast('Heure d\'arrivée requise','ko');return;}
+  const box=document.getElementById('ret-box');
+  const totalMn=box._mn||0;
+  if(totalMn<=0){toast('Pas de retard à enregistrer','ko');return;}
+  const emp=DB.employes.find(e=>e.id===empId);
+  const motif=document.getElementById('r-motif').value;
+  DB.retards.push({id:nid(),empId,empNom:emp.nom,date,type:'arrivee',hprev:document.getElementById('r-hprev').value,harr,rh:Math.floor(totalMn/60),rm:totalMn%60,totalMn,motif,justifie:motif?'Oui':'Non',ts:Date.now(),source:'rh'});
+  saveDB();clrR();renderLast();updateCnts();toast('Retard enregistré !','ok');
+}
+
+// CALCUL DÉPART ANTICIPÉ AUTO
+function onEmpChangeDep(){
+  const id=document.getElementById('d-emp').value;
+  const emp=DB.employes.find(e=>e.id===id);
+  if(emp&&emp.hdep)document.getElementById('d-hprev').value=emp.hdep;
+  calcDep();
+}
+
+function calcDep(){
+  const hp=document.getElementById('d-hprev').value;
+  const hd=document.getElementById('d-hdep').value;
+  const box=document.getElementById('dep-box');
+  if(!hd){box.className='ret-box empty';box.innerHTML='<div class="ret-lbl" style="color:var(--G4);">Saisissez l\'heure de départ réelle</div>';box._mn=0;return;}
+  const [ph,pm]=hp.split(':').map(Number);
+  const [dh,dm]=hd.split(':').map(Number);
+  const diff=(ph*60+pm)-(dh*60+dm); // >0 = parti avant l'heure prévue
+  if(diff<=0){
+    box.className='ret-box ok';
+    box.innerHTML='<div style="font-size:28px;">✅</div><div class="ret-lbl" style="color:var(--GRN);font-weight:700;">Départ à l\'heure ou après</div>';
+    box._mn=0;return;
+  }
+  const h=Math.floor(diff/60),m=diff%60;
+  box.className='ret-box late';
+  box.innerHTML=`<div class="ret-val">${h&&m?h+'h '+m+'min':h?h+'h':m+'min'}</div><div class="ret-lbl" style="color:var(--O1);">de départ anticipé</div>`;
+  box._mn=diff;
+}
+
+// SAVE DÉPART ANTICIPÉ
+function saveDep(){
+  const empId=document.getElementById('d-emp').value;
+  const date=document.getElementById('d-date').value;
+  const hdep=document.getElementById('d-hdep').value;
+  if(!empId||!date){toast('Employé et date requis','ko');return;}
+  if(!hdep){toast('Heure de départ requise','ko');return;}
+  const box=document.getElementById('dep-box');
+  const totalMn=box._mn||0;
+  if(totalMn<=0){toast('Pas de départ anticipé à enregistrer','ko');return;}
+  const emp=DB.employes.find(e=>e.id===empId);
+  const motif=document.getElementById('d-motif').value;
+  const justifie=document.getElementById('d-just').value;
+  DB.retards.push({id:nid(),empId,empNom:emp.nom,date,type:'depart',hprev:document.getElementById('d-hprev').value,harr:hdep,rh:Math.floor(totalMn/60),rm:totalMn%60,totalMn,motif,justifie:motif?justifie:'Non',ts:Date.now(),source:'rh'});
+  saveDB();clrD();renderLast();updateCnts();toast('Départ anticipé enregistré !','ok');
+}
+
+// SAVE ABSENCE
+function saveAbs(){
+  const empId=document.getElementById('a-emp').value;
+  const deb=document.getElementById('a-deb').value;
+  if(!empId||!deb){toast('Employé et date requis','ko');return;}
+  const emp=DB.employes.find(e=>e.id===empId);
+  const ms=document.getElementById('a-mot').value;
+  const ml=document.getElementById('a-mot2').value;
+  DB.absences.push({id:nid(),empId,empNom:emp.nom,dateDebut:deb,dateFin:document.getElementById('a-fin').value||deb,jours:parseFloat(document.getElementById('a-j').value)||1,motif:ml||(ms||'Non précisé'),justifie:document.getElementById('a-just').value,ts:Date.now()});
+  saveDB();clrA();renderLast();updateCnts();toast('Absence enregistrée !','ok');
+}
+
+function clrR(){document.getElementById('r-emp').value='';document.getElementById('r-date').value=today();document.getElementById('r-harr').value='';document.getElementById('r-hprev').value='08:00';document.getElementById('r-motif').value='';const b=document.getElementById('ret-box');b.className='ret-box empty';b.innerHTML='<div class="ret-lbl" style="color:var(--G4);">Saisissez l\'heure d\'arrivée</div>';b._mn=0;}
+function clrD(){document.getElementById('d-emp').value='';document.getElementById('d-date').value=today();document.getElementById('d-hdep').value='';document.getElementById('d-hprev').value='17:30';document.getElementById('d-motif').value='';document.getElementById('d-just').value='Non';const b=document.getElementById('dep-box');b.className='ret-box empty';b.innerHTML='<div class="ret-lbl" style="color:var(--G4);">Saisissez l\'heure de départ réelle</div>';b._mn=0;}
+function clrA(){document.getElementById('a-emp').value='';document.getElementById('a-deb').value=today();document.getElementById('a-fin').value='';document.getElementById('a-j').value='1';document.getElementById('a-mot').value='';document.getElementById('a-mot2').value='';document.getElementById('a-just').value='Oui';}
+
+// DELETE
+function del(tp,id){
+  if(!confirm('Supprimer ?'))return;
+  if(tp==='R')DB.retards=DB.retards.filter(r=>r.id!==id);
+  else DB.absences=DB.absences.filter(a=>a.id!==id);
+  saveDB();renderLast();updateCnts();renderDash();toast('Supprimé','ok');
+}
+
+// LAST ENTRIES
+function renderLast(){
+  const all=[...DB.retards.map(r=>({...r,tp:'R'})),...DB.absences.map(a=>({...a,tp:'A'}))].sort((a,b)=>b.ts-a.ts).slice(0,15);
+  const el=document.getElementById('last-list');
+  if(!all.length){el.innerHTML='<div class="empty"><div class="eico">📝</div><p>Aucune saisie pour le moment</p></div>';return;}
+  el.innerHTML=all.map(e=>{
+    if(e.tp==='R'){
+      const isDepart=e.type==='depart';
+      const lbl=isDepart?'🚪 Départ anticipé':'⏱ Retard';
+      return `<div class="list-item">${av(e.empNom)}<div class="li-body"><div class="li-name">${e.empNom}</div><div class="li-sub">${e.date} • <span class="badge ${isDepart?'bb':'bo'}">${lbl}</span> ${e.justifie==='Oui'?'<span class="badge bg" style="margin-left:4px;">✓ Just.</span>':'<span class="badge br" style="margin-left:4px;">✗ N.J.</span>'}</div></div><div class="li-right"><div class="li-val li-val-o">${fmt(e.totalMn)}</div><button class="btn-sm btn-del" onclick="del('R','${e.id}')" style="margin-top:4px;">🗑</button></div></div>`;
+    }
+    return `<div class="list-item">${av(e.empNom)}<div class="li-body"><div class="li-name">${e.empNom}</div><div class="li-sub">${e.dateDebut} • <span class="badge br">📋 Absence</span></div><div style="font-size:11px;color:var(--G4);margin-top:2px;">${e.motif||''}</div></div><div class="li-right"><div class="li-val li-val-r">${e.jours}j</div><div style="margin-top:2px;"><span class="badge ${e.justifie==='Oui'?'bg':'br'}" style="font-size:10px;">${e.justifie==='Oui'?'✓':'✗'}</span></div><button class="btn-sm btn-del" onclick="del('A','${e.id}')" style="margin-top:4px;">🗑</button></div></div>`;
+  }).join('');
+}
+
+// DASHBOARD
+function renderDash(){
+  const m=document.getElementById('dash-m').value;
+  const yr2=yr();
+  document.getElementById('dash-ttl').textContent='Bord '+yr2+(m?' — '+MOIS[+m]:'');
+  let rets=fyear(DB.retards);let abs=fyear(DB.absences,'dateDebut');
+  if(m){rets=fmon(rets,m);abs=fmon(abs,m,'dateDebut');}
+  const totR=rets.reduce((s,r)=>s+r.totalMn,0);
+  const totA=abs.reduce((s,a)=>s+a.jours,0);
+  const njus=abs.filter(a=>a.justifie==='Non').length;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi kpi-b"><div class="kv">${DB.employes.filter(e=>e.statut==='Actif').length}</div><div class="kl">Employés actifs</div></div>
+    <div class="kpi kpi-o"><div class="kv">${fmt(totR)||'0m'}</div><div class="kl">Total retards</div></div>
+    <div class="kpi kpi-r"><div class="kv">${totA.toFixed(1)}j</div><div class="kl">Jours absence</div></div>
+    <div class="kpi kpi-g"><div class="kv">${njus}</div><div class="kl">Non justifiées</div></div>`;
+
+  const byR={};rets.forEach(r=>{byR[r.empNom]=(byR[r.empNom]||0)+r.totalMn;});
+  const topR=Object.entries(byR).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const mxR=topR[0]?.[1]||1;
+  document.getElementById('ch-ret').innerHTML=topR.length?topR.map(([n,v])=>`<div class="cbar-row"><div class="cbar-name" title="${n}">${n.split(' ')[0]} ${n.split(' ').slice(-1)[0]}</div><div class="cbar-bg"><div class="cbar-fill" style="width:${Math.round(v/mxR*100)}%;background:linear-gradient(90deg,#ff9800,#e65100);"><span class="cbar-val">${fmt(v)}</span></div></div></div>`).join(''):'<p style="color:var(--G4);font-size:13px;text-align:center;padding:16px 0;">Aucun retard saisi</p>';
+
+  const byA={};abs.forEach(a=>{byA[a.empNom]=(byA[a.empNom]||0)+a.jours;});
+  const topA=Object.entries(byA).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const mxA=topA[0]?.[1]||1;
+  document.getElementById('ch-abs').innerHTML=topA.length?topA.map(([n,v])=>`<div class="cbar-row"><div class="cbar-name" title="${n}">${n.split(' ')[0]} ${n.split(' ').slice(-1)[0]}</div><div class="cbar-bg"><div class="cbar-fill" style="width:${Math.round(v/mxA*100)}%;background:linear-gradient(90deg,#2d6bc4,#1a3a6e);"><span class="cbar-val">${v}j</span></div></div></div>`).join(''):'<p style="color:var(--G4);font-size:13px;text-align:center;padding:16px 0;">Aucune absence saisie</p>';
+
+  const nj=abs.filter(a=>a.justifie==='Non');
+  const njE={};nj.forEach(a=>{if(!njE[a.empNom])njE[a.empNom]={n:a.empNom,cnt:0};njE[a.empNom].cnt++;});
+  const njA=Object.values(njE).sort((a,b)=>b.cnt-a.cnt);
+  document.getElementById('njus-b').textContent=njA.length+' employés';
+  document.getElementById('njus-list').innerHTML=njA.length?njA.map(e=>`<div class="list-item">${av(e.n)}<div class="li-body"><div class="li-name">${e.n}</div></div><div class="li-right"><div class="li-val li-val-r">${e.cnt} N.J.</div></div></div>`).join(''):'<div class="empty" style="padding:20px;"><p>Aucune absence non justifiée</p></div>';
+}
+
+// RETARDS LIST
+function renderRet(){
+  const m=document.getElementById('f-ret-m').value;
+  const q=document.getElementById('s-ret').value.toLowerCase();
+  const tp=document.getElementById('f-ret-tp').value;
+  const jf=document.getElementById('f-ret-j').value;
+  let d=fyear(DB.retards);
+  if(m)d=fmon(d,m);
+  if(tp)d=d.filter(r=>(r.type||'arrivee')===tp);
+  if(jf)d=d.filter(r=>(r.justifie||'Non')===jf);
+  if(q)d=d.filter(r=>r.empNom.toLowerCase().includes(q)||r.motif?.toLowerCase().includes(q));
+  d.sort((a,b)=>b.date.localeCompare(a.date));
+  const el=document.getElementById('ret-list');
+  el.innerHTML=d.length?d.map(r=>{
+    const isDepart=r.type==='depart';
+    const justifie=r.justifie==='Oui';
+    return `<div class="list-item">${av(r.empNom)}<div class="li-body"><div class="li-name">${r.empNom}</div><div class="li-sub">${r.date} • ${isDepart?'🚪 Départ':'⏱ Arrivée'} • ${r.hprev||'—'} → ${r.harr||'?'} • <span class="badge ${justifie?'bg':'br'}">${justifie?'✓ Just.':'✗ N.J.'}</span></div>${r.motif?`<div style="font-size:11px;color:var(--G4);margin-top:2px;">${r.motif}</div>`:''}</div><div class="li-right"><div class="li-val li-val-o">${fmt(r.totalMn)}</div><button class="btn-sm btn-del" onclick="del('R','${r.id}')" style="margin-top:4px;">🗑</button></div></div>`;
+  }).join(''):'<div class="empty"><div class="eico">✅</div><p>Aucun retard pour cette période</p></div>';
+}
+
+// ABSENCES LIST
+function renderAbs(){
+  const m=document.getElementById('f-abs-m').value;
+  const jf=document.getElementById('f-abs-j').value;
+  const q=document.getElementById('s-abs').value.toLowerCase();
+  let d=fyear(DB.absences,'dateDebut');
+  if(m)d=fmon(d,m,'dateDebut');
+  if(jf)d=d.filter(a=>a.justifie===jf);
+  if(q)d=d.filter(a=>a.empNom.toLowerCase().includes(q)||a.motif?.toLowerCase().includes(q));
+  d.sort((a,b)=>b.dateDebut.localeCompare(a.dateDebut));
+  const el=document.getElementById('abs-list');
+  el.innerHTML=d.length?d.map(a=>`<div class="list-item">${av(a.empNom)}<div class="li-body"><div class="li-name">${a.empNom}</div><div class="li-sub">${a.dateDebut}${a.dateFin!==a.dateDebut?' → '+a.dateFin:''} • <span class="badge ${a.justifie==='Oui'?'bg':'br'}">${a.justifie==='Oui'?'✓ Just.':'✗ N.J.'}</span></div><div style="font-size:11px;color:var(--G4);margin-top:2px;">${a.motif||''}</div></div><div class="li-right"><div class="li-val li-val-r">${a.jours}j</div><button class="btn-sm btn-del" onclick="del('A','${a.id}')" style="margin-top:4px;">🗑</button></div></div>`).join(''):'<div class="empty"><div class="eico">✅</div><p>Aucune absence pour cette période</p></div>';
+}
+
+// ANNUEL
+function renderAnn(){
+  const rets=fyear(DB.retards);const abs=fyear(DB.absences,'dateDebut');
+  document.getElementById('ann-yr').textContent=yr();
+  const months=Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
+  document.getElementById('mgrid').innerHTML=months.map(m=>{
+    const r=rets.filter(x=>x.date.substring(5,7)===m);
+    const a=abs.filter(x=>x.dateDebut.substring(5,7)===m);
+    const tot=r.reduce((s,x)=>s+x.totalMn,0);
+    const j=a.reduce((s,x)=>s+x.jours,0);
+    const hd=r.length>0||a.length>0;
+    return `<div class="mc ${hd?'hd':''}">
+      <div class="mc-n">${MOIS[+m].substring(0,4).toUpperCase()}</div>
+      <div class="mc-v" style="color:${hd?'var(--O1)':'var(--G3)'};">${tot?fmt(tot):j?j+'j':'—'}</div>
+      <div class="mc-s">${r.length?r.length+'r ':''} ${a.length?a.length+'a':''}</div>
+    </div>`;
+  }).join('');
+
+  const mR=months.map(m=>({m,v:rets.filter(r=>r.date.substring(5,7)===m).reduce((s,r)=>s+r.totalMn,0)}));
+  const mxR=Math.max(...mR.map(d=>d.v),1);
+  document.getElementById('ann-cr').innerHTML=mR.filter(d=>d.v>0).map(d=>`<div class="cbar-row"><div class="cbar-name">${MOIS[+d.m].substring(0,4)}</div><div class="cbar-bg"><div class="cbar-fill" style="width:${Math.round(d.v/mxR*100)}%;background:linear-gradient(90deg,#ff9800,#e65100);"><span class="cbar-val">${fmt(d.v)}</span></div></div></div>`).join('')||'<p style="color:var(--G4);font-size:13px;text-align:center;padding:16px 0;">Aucun retard cette année</p>';
+
+  const mA=months.map(m=>({m,v:abs.filter(a=>a.dateDebut.substring(5,7)===m).reduce((s,a)=>s+a.jours,0)}));
+  const mxA=Math.max(...mA.map(d=>d.v),1);
+  document.getElementById('ann-ca').innerHTML=mA.filter(d=>d.v>0).map(d=>`<div class="cbar-row"><div class="cbar-name">${MOIS[+d.m].substring(0,4)}</div><div class="cbar-bg"><div class="cbar-fill" style="width:${Math.round(d.v/mxA*100)}%;background:linear-gradient(90deg,#2d6bc4,#1a3a6e);"><span class="cbar-val">${d.v}j</span></div></div></div>`).join('')||'<p style="color:var(--G4);font-size:13px;text-align:center;padding:16px 0;">Aucune absence cette année</p>';
+
+  const em={};
+  rets.forEach(r=>{if(!em[r.empId])em[r.empId]={n:r.empNom,rm:0,nr:0,ja:0,na:0,nj:0};em[r.empId].rm+=r.totalMn;em[r.empId].nr++;});
+  abs.forEach(a=>{if(!em[a.empId])em[a.empId]={n:a.empNom,rm:0,nr:0,ja:0,na:0,nj:0};em[a.empId].ja+=a.jours;em[a.empId].na++;if(a.justifie==='Non')em[a.empId].nj++;});
+  const ea=Object.values(em).sort((a,b)=>(b.rm+b.ja*60)-(a.rm+a.ja*60));
+  document.getElementById('ann-es').textContent=ea.length+' employés';
+  document.getElementById('ann-emp-list').innerHTML=ea.length?ea.map((e,i)=>`<div class="list-item">${av(e.n)}<div class="li-body"><div class="li-name">${e.n}</div><div class="li-sub">${e.nr?e.nr+' retard(s)':''} ${e.na?'• '+e.na+' absence(s)':''}</div>${e.nj?`<div style="font-size:11px;margin-top:2px;"><span class="badge br">${e.nj} non just.</span></div>`:''}</div><div class="li-right"><div class="li-val li-val-o">${fmt(e.rm)}</div>${e.ja?`<div class="li-val li-val-r" style="font-size:13px;">${e.ja}j</div>`:''}</div></div>`).join(''):'<div class="empty" style="padding:20px;"><p>Aucune donnée pour '+yr()+'</p></div>';
+}
+
+// EMPLOYES
+function renderEmp(){
+  const kd=document.getElementById('kiosk-token-display');
+  if(kd)kd.textContent=(DB.settings&&DB.settings.kioskToken)?DB.settings.kioskToken:'••••••••';
+  const q=document.getElementById('s-emp').value.toLowerCase();
+  const rets=fyear(DB.retards);const abs=fyear(DB.absences,'dateDebut');
+  let d=DB.employes.filter(e=>!q||e.nom.toLowerCase().includes(q)).sort((a,b)=>a.nom.localeCompare(b.nom));
+  const el=document.getElementById('emp-list');
+  el.innerHTML=d.length?d.map(e=>{
+    const er=rets.filter(r=>r.empId===e.id).reduce((s,r)=>s+r.totalMn,0);
+    const ea=abs.filter(a=>a.empId===e.id).reduce((s,a)=>s+a.jours,0);
+    const avatar=av(e.nom);
+    const pairBadge=e.phonePaired?'<span style="color:var(--GRN);font-weight:600;" title="Téléphone jumelé">🟢 Tél. jumelé</span>':'<span style="color:var(--G4);" title="Le téléphone n\'a pas encore été jumelé">⚪ Non jumelé</span>';
+    return `<div class="list-item">${avatar}<div class="li-body"><div class="li-name">${e.nom}</div><div class="li-sub">${e.poste||'—'} ${e.dept?'• '+e.dept:''}</div><div style="font-size:11px;margin-top:3px;">${er?`<span style="color:var(--O1);font-weight:600;">⏱ ${fmt(er)}</span>`:''} ${ea?`<span style="color:var(--RED);font-weight:600;margin-left:6px;">📅 ${ea}j</span>`:''} ${pairBadge}</div></div><div class="li-right" style="display:flex;flex-direction:column;gap:4px;"><button class="btn-sm btn-edit" onclick="editEmp('${e.id}')">✏</button><button class="btn-sm btn-del" onclick="delEmp('${e.id}')">🗑</button></div></div>`;
+  }).join(''):'<div class="empty"><p>Aucun employé trouvé</p></div>';
+}
+
+function openEmp(){document.getElementById('e-nom').value='';document.getElementById('e-poste').value='';document.getElementById('e-dept').value='';document.getElementById('e-href').value='08:00';document.getElementById('e-hdep').value='17:30';document.getElementById('e-stat').value='Actif';document.getElementById('e-id').value='';
+  document.getElementById('e-secret-box').style.display='none';
+  document.getElementById('e-secret-new-hint').style.display='block';
+  document.getElementById('emp-ttl').textContent='Ajouter un employé';document.getElementById('ov-emp').classList.add('on');}
+function editEmp(id){const e=DB.employes.find(e=>e.id===id);if(!e)return;document.getElementById('e-nom').value=e.nom;document.getElementById('e-poste').value=e.poste||'';document.getElementById('e-dept').value=e.dept||'';document.getElementById('e-href').value=e.href||'08:00';document.getElementById('e-hdep').value=e.hdep||'17:30';document.getElementById('e-stat').value=e.statut||'Actif';document.getElementById('e-id').value=id;
+  document.getElementById('e-secret-new-hint').style.display='none';
+  document.getElementById('e-secret-box').style.display='block';
+  document.getElementById('e-secret-display').textContent='••••••••••';
+  document.getElementById('e-secret-status').textContent=e.phonePaired
+    ? 'Téléphone déjà jumelé. Régénérer révoque le jumelage actuel (l\'employé devra re-jumeler avec le nouveau code).'
+    : 'Cliquez sur "🔑 Régénérer" pour générer et afficher le code à communiquer à l\'employé.';
+  document.getElementById('emp-ttl').textContent='Modifier';document.getElementById('ov-emp').classList.add('on');
+}
+function saveEmp(){
+  const nom=document.getElementById('e-nom').value.trim();
+  if(!nom){toast('Nom requis','ko');return;}
+  const id=document.getElementById('e-id').value;
+  if(id){const e=DB.employes.find(e=>e.id===id);if(e){e.nom=nom;e.poste=document.getElementById('e-poste').value;e.dept=document.getElementById('e-dept').value;e.href=document.getElementById('e-href').value;e.hdep=document.getElementById('e-hdep').value;e.statut=document.getElementById('e-stat').value;}}
+  else{DB.employes.push({id:nid(),nom,poste:document.getElementById('e-poste').value,dept:document.getElementById('e-dept').value,href:document.getElementById('e-href').value,hdep:document.getElementById('e-hdep').value,statut:document.getElementById('e-stat').value});}
+  saveDB();closeOv('ov-emp');renderEmp();fillSel();toast('Employé enregistré','ok');
+}
+function delEmp(id){if(!confirm('Supprimer cet employé ?'))return;DB.employes=DB.employes.filter(e=>e.id!==id);saveDB();renderEmp();toast('Supprimé','ok');}
+
+// ===== CODE SECRET DE POINTAGE (jumelage de l'app Scan du téléphone) =====
+async function revealOrRegenEmpSecret(){
+  const id=document.getElementById('e-id').value;
+  if(!id){toast('Enregistrez d\'abord l\'employé','ko');return;}
+  const e=DB.employes.find(e=>e.id===id);
+  if(e && e.phonePaired && !confirm('Cet employé a déjà jumelé son téléphone. Générer un nouveau code annule ce jumelage — il devra ressaisir le nouveau code dans son app Scan. Continuer ?'))return;
+  try{
+    const res=await fetch('/api/settings/employee-secret',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empId:id})});
+    const data=await res.json();
+    if(!res.ok||!data.ok){toast(data.error||'Erreur','ko');return;}
+    document.getElementById('e-secret-display').textContent=data.secret;
+    document.getElementById('e-secret-status').textContent='Nouveau code généré — communiquez-le UNE FOIS à l\'employé (app Scan).';
+    if(e){e.phonePaired=false;}
+    renderEmp();
+  }catch(err){
+    toast('Connexion impossible','ko');
+  }
+}
+
+function closeOv(id){document.getElementById(id).classList.remove('on');}
+
+function updateCnts(){
+  const y=yr();
+  document.getElementById('c-ret').textContent=DB.retards.filter(r=>r.date.startsWith(y)).length;
+  document.getElementById('c-abs').textContent=DB.absences.filter(a=>a.dateDebut.startsWith(y)).length;
+}
+
+function exportCSV(){
+  const y=yr();let csv='Type,Employé,Date,Détail,Motif,Justifié\n';
+  DB.retards.filter(r=>r.date.startsWith(y)).forEach(r=>csv+=`${r.type==='depart'?'Départ anticipé':'Retard'},"${r.empNom}","${r.date}","${fmt(r.totalMn)}","${r.motif||''}","${r.justifie||'Non'}"\n`);
+  DB.absences.filter(a=>a.dateDebut.startsWith(y)).forEach(a=>csv+=`Absence,"${a.empNom}","${a.dateDebut}","${a.jours}j","${a.motif||''}","${a.justifie}"\n`);
+  const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);
+  const el=document.createElement('a');el.href=u;el.download='presences_'+y+'.csv';el.click();
+  toast('Export CSV téléchargé','ok');
+}
+
+// INIT
+(async function init(){
+  const loggedIn=await checkSession();
+  if(loggedIn){
+    document.getElementById('lock-screen').style.display='none';
+    await startApp();
+  } else {
+    sessionExpired=true; // pas encore connecté : évite un faux message "session expirée"
+    setTimeout(()=>document.getElementById('login-user')?.focus(),300);
+  }
+  setInterval(refreshFromServer,5000); // synchronisation avec les autres appareils connectés
+})();
+</script>
+</body>
+</html>

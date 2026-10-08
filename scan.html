@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Scan — Sha'ah</title>
+<style>
+:root{
+  --B1:#081431;--B2:#0d2050;--B3:#123072;--B4:#1c4fa8;
+  --GD1:#a9791f;--GD2:#d4af37;--GD3:#e8c766;--GD4:#f0d78c;
+  --GRN:#1a7a4c;--GRNP:#e6f5ee;--RED:#c0392b;--REDP:#fdecea;
+  --G4:#8691aa;--W:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--B1);color:var(--W);}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 30% 0%,var(--B3) 0%,var(--B2) 45%,var(--B1) 100%);}
+.screen.on{display:flex;}
+.inner{width:100%;max-width:380px;text-align:center;}
+
+.logo{width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,var(--GD4),var(--GD2));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 24px rgba(212,175,55,.3);font-size:28px;}
+h1{font-size:22px;font-weight:800;margin-bottom:6px;}
+p.sub{font-size:14px;color:rgba(255,255,255,.55);margin-bottom:28px;line-height:1.5;}
+
+.pair-code{width:100%;padding:18px;text-align:center;font-size:22px;letter-spacing:5px;border-radius:16px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;outline:none;margin-bottom:14px;text-transform:uppercase;font-family:'SF Mono',Consolas,monospace;}
+.pair-code::placeholder{letter-spacing:2px;font-family:inherit;color:rgba(255,255,255,.3);}
+.btn{width:100%;padding:18px;border-radius:999px;background:linear-gradient(135deg,var(--GD4),var(--GD2));color:var(--B1);font-size:17px;font-weight:800;border:none;cursor:pointer;box-shadow:0 8px 26px rgba(212,175,55,.3);}
+.btn:active{transform:scale(.97);}
+.btn.ghost{background:rgba(255,255,255,.1);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.18);font-weight:600;font-size:15px;margin-top:10px;}
+.err{color:#ffb3a7;font-size:13px;margin-top:12px;min-height:16px;font-weight:600;}
+
+/* READY SCREEN */
+.id-card{background:rgba(255,255,255,.08);border:1px solid rgba(212,175,55,.25);border-radius:20px;padding:22px 20px;margin-bottom:26px;}
+.id-av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--GD4),var(--GD2));color:var(--B1);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;margin:0 auto 12px;}
+.id-name{font-size:19px;font-weight:800;}
+.id-tag{font-size:12px;color:var(--GD3);margin-top:2px;letter-spacing:.5px;text-transform:uppercase;}
+
+/* SCAN SCREEN */
+.scan-frame{position:relative;width:270px;height:270px;margin:0 auto 22px;border-radius:24px;overflow:hidden;background:#000;}
+.scan-frame video{width:100%;height:100%;object-fit:cover;}
+.scan-corner{position:absolute;width:34px;height:34px;border:3px solid var(--GD2);}
+.tl{top:10px;left:10px;border-right:none;border-bottom:none;border-radius:8px 0 0 0;}
+.tr{top:10px;right:10px;border-left:none;border-bottom:none;border-radius:0 8px 0 0;}
+.bl{bottom:10px;left:10px;border-right:none;border-top:none;border-radius:0 0 0 8px;}
+.br{bottom:10px;right:10px;border-left:none;border-top:none;border-radius:0 0 8px 0;}
+.scan-line{position:absolute;left:8%;right:8%;height:2px;background:linear-gradient(90deg,transparent,var(--GD3),transparent);animation:sweep 2s ease-in-out infinite;}
+@keyframes sweep{0%{top:12%;}50%{top:85%;}100%{top:12%;}}
+.scan-msg{font-size:14px;color:rgba(255,255,255,.55);margin-bottom:6px;}
+
+/* RESULT SCREEN */
+.res-ico{font-size:76px;margin-bottom:14px;animation:pop .4s ease;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}80%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.res-title{font-size:22px;font-weight:800;margin-bottom:8px;}
+.res-sub{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:6px;}
+.res-badge{display:inline-block;padding:8px 20px;border-radius:999px;font-size:14px;font-weight:700;margin-top:6px;margin-bottom:28px;}
+.badge-ok{background:var(--GRNP);color:var(--GRN);}
+.badge-late{background:#3a2f10;color:var(--GD4);}
+.badge-ko{background:var(--REDP);color:var(--RED);}
+
+.unpair-link{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:11.5px;color:rgba(255,255,255,.3);}
+.unpair-link a{color:rgba(255,255,255,.4);text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN 0 : JUMELAGE -->
+<div class="screen" id="s-pair">
+  <div class="inner">
+    <div class="logo">📱</div>
+    <h1>Bienvenue sur Scan</h1>
+    <p class="sub">Entrez votre code secret personnel de pointage, fourni une seule fois par le service RH, pour lier cette app à votre identité.</p>
+    <input type="text" id="pair-input" class="pair-code" maxlength="16" placeholder="CODE SECRET" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" onkeydown="if(event.key==='Enter')doPair()">
+    <button class="btn" onclick="doPair()">🔗 Lier mon téléphone</button>
+    <div class="err" id="pair-err"></div>
+  </div>
+</div>
+
+<!-- ÉCRAN 1 : PRÊT -->
+<div class="screen" id="s-ready">
+  <div class="inner">
+    <div class="id-card">
+      <div class="id-av" id="ready-av"></div>
+      <div class="id-name" id="ready-name"></div>
+      <div class="id-tag">Identité liée à cet appareil</div>
+    </div>
+    <button class="btn" onclick="startScan()">📷 Scanner le QR de pointage</button>
+    <div class="unpair-link">Ce n'est pas vous ? <a href="#" onclick="unpair();return false;">Changer de compte</a></div>
+  </div>
+</div>
+
+<!-- ÉCRAN 2 : SCAN CAMÉRA -->
+<div class="screen" id="s-scan">
+  <div class="inner">
+    <h1 style="font-size:19px;">Visez le QR sur la tablette</h1>
+    <div class="scan-msg" id="scan-msg">Recherche du QR<span style="opacity:.5;">…</span></div>
+    <div class="scan-frame">
+      <video id="scan-video" autoplay playsinline muted></video>
+      <div class="scan-corner tl"></div><div class="scan-corner tr"></div>
+      <div class="scan-corner bl"></div><div class="scan-corner br"></div>
+      <div class="scan-line"></div>
+    </div>
+    <button class="btn ghost" onclick="stopScan()">← Annuler</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 3 : RÉSULTAT -->
+<div class="screen" id="s-result">
+  <div class="inner">
+    <div class="res-ico" id="res-ico">✅</div>
+    <div class="res-title" id="res-title">Pointage validé</div>
+    <div class="res-sub" id="res-sub"></div>
+    <div class="res-badge" id="res-badge"></div>
+    <button class="btn" onclick="backToReady()">← Terminer</button>
+  </div>
+</div>
+
+<script src="/vendor/jsQR.js"></script>
+<script>
+let IDENTITY=null; // {empId, empNom, secret}
+let scanStream=null, scanRAF=null;
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+function fmt(mn){if(!mn)return '—';const h=Math.floor(mn/60),m=mn%60;if(h&&m)return h+'h '+m+'m';return h?h+'h':m+'m';}
+
+function loadIdentity(){
+  try{
+    const raw=localStorage.getItem('sha3ah_identity');
+    IDENTITY=raw?JSON.parse(raw):null;
+  }catch(e){ IDENTITY=null; }
+}
+function saveIdentity(){ localStorage.setItem('sha3ah_identity', JSON.stringify(IDENTITY)); }
+
+function goPair(err){
+  document.getElementById('pair-input').value='';
+  document.getElementById('pair-err').textContent=err||'';
+  goScreen('s-pair');
+}
+function goReady(){
+  document.getElementById('ready-av').textContent=ini(IDENTITY.empNom);
+  document.getElementById('ready-name').textContent=IDENTITY.empNom;
+  goScreen('s-ready');
+}
+
+async function doPair(){
+  const code=(document.getElementById('pair-input').value||'').trim().toUpperCase();
+  if(!code){document.getElementById('pair-err').textContent='Veuillez saisir votre code secret';return;}
+  let res,data;
+  try{
+    res=await fetch('/api/employee/pair',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({secret:code})
+    });
+    data=await res.json();
+  }catch(e){
+    document.getElementById('pair-err').textContent='Connexion au serveur impossible.';
+    return;
+  }
+  if(!res.ok||!data.ok){
+    document.getElementById('pair-err').textContent=data.error||'Code incorrect.';
+    return;
+  }
+  IDENTITY={empId:data.empId, empNom:data.empNom, secret:data.secret};
+  saveIdentity();
+  goReady();
+}
+
+function unpair(){
+  localStorage.removeItem('sha3ah_identity');
+  IDENTITY=null;
+  goPair();
+}
+function backToReady(){ goReady(); }
+
+// ===== SIGNATURE HMAC-SHA256 (Web Crypto) =====
+async function hmacHex(secret, message){
+  const enc=new TextEncoder();
+  const key=await crypto.subtle.importKey('raw', enc.encode(secret), {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
+  const sig=await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ===== SCAN CAMÉRA =====
+async function startScan(){
+  document.getElementById('scan-msg').textContent='Recherche du QR…';
+  goScreen('s-scan');
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:640},height:{ideal:640}},audio:false});
+  }catch(e){
+    try{ scanStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false}); }
+    catch(e2){ alert('Caméra indisponible sur cet appareil/navigateur.'); goReady(); return; }
+  }
+  const video=document.getElementById('scan-video');
+  video.srcObject=scanStream;
+  await new Promise(r=>{video.onloadedmetadata=r;});
+
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d', {willReadFrequently:true});
+  let handled=false;
+
+  function tick(){
+    if(handled)return;
+    if(video.readyState===video.HAVE_ENOUGH_DATA){
+      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'});
+      if(code && code.data){
+        handled=true;
+        onQrDetected(code.data.trim());
+        return;
+      }
+    }
+    scanRAF=requestAnimationFrame(tick);
+  }
+  scanRAF=requestAnimationFrame(tick);
+}
+
+function stopScan(){
+  if(scanRAF)cancelAnimationFrame(scanRAF);
+  scanRAF=null;
+  if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
+  goReady();
+}
+
+async function onQrDetected(challengeId){
+  document.getElementById('scan-msg').textContent='QR détecté — validation…';
+  if(scanRAF)cancelAnimationFrame(scanRAF);
+  if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
+
+  let res,data;
+  try{
+    const signature=await hmacHex(IDENTITY.secret, challengeId);
+    res=await fetch('/api/pointage/scan',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({challengeId, empId:IDENTITY.empId, signature})
+    });
+    data=await res.json();
+  }catch(e){
+    showResult(false,'Connexion impossible','Vérifiez votre connexion internet et réessayez.');
+    return;
+  }
+  if(!res.ok||!data.ok){
+    showResult(false,'Pointage refusé', data.error||'Une erreur est survenue.');
+    return;
+  }
+  const rec=data.record;
+  const label=(data.estAnomalie
+    ? '⏱ '+fmt(rec.totalMn)+(rec.justifie==='Oui'?' (justifié)':' — à justifier')
+    : '✅ À l\'heure');
+  showResult(true, data.empNom+' — pointage enregistré', rec.harr+' • H. prévue : '+rec.hprev, label, data.estAnomalie);
+}
+
+function showResult(ok, title, sub, badgeText, isAnomalie){
+  document.getElementById('res-ico').textContent = ok ? '✅' : '⚠️';
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-sub').textContent = sub||'';
+  const badge=document.getElementById('res-badge');
+  if(ok){
+    badge.style.display='inline-block';
+    badge.className='res-badge '+(isAnomalie?'badge-late':'badge-ok');
+    badge.textContent=badgeText||'';
+  } else {
+    badge.style.display='none';
+  }
+  goScreen('s-result');
+}
+
+// ===== INIT =====
+(function init(){
+  loadIdentity();
+  if(IDENTITY && IDENTITY.empId && IDENTITY.secret){ goReady(); }
+  else { goPair(); }
+})();
+</script>
+</body>
+</html>
